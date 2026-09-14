@@ -1,12 +1,12 @@
-import os
-import pyproj
+#import os
+#import pyproj
 
 # Descobre automaticamente o caminho correto do PROJ no seu ambiente Python
-proj_data_path = pyproj.datadir.get_data_dir()
+#proj_data_path = pyproj.datadir.get_data_dir()
 
 # Define as variáveis de ambiente necessárias para sobrepor o caminho do PostgreSQL
-os.environ["PROJ_LIB"] = proj_data_path
-os.environ["PROJ_DATA"] = proj_data_path
+#os.environ["PROJ_LIB"] = proj_data_path
+#os.environ["PROJ_DATA"] = proj_data_path
 
 from io import BytesIO
 import geopandas as gpd
