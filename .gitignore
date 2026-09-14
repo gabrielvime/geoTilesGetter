@@ -98,4 +98,7 @@ pip-selfcheck.json
 *.wmv
 *.webm
 
+### SHAPES FOLDER ###
+/shapes/
+
 # End of https://www.toptal.com/developers/gitignore/api/images,video,venv

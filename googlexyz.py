@@ -19,12 +19,12 @@ from PIL import Image
 import os
 from pathlib import Path
 
-def getData(geometryData, z):
+def getData(geometryData, z, shapefile_name):
 #POLYGONS
 #shapefile_path = "processo_850092_2020.zip"
   shapefile_path = shape_file
 
-  shapefile_name = Path(shape_file).stem
+  #shapefile_name = Path(shape_file).stem
  
   gdf = gpd.read_file(shapefile_path)
 
