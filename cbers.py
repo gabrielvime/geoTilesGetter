@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import geopandas as gpd
 from pystac_client import Client
 import rasterio
@@ -14,6 +16,9 @@ Get CBERS imagery from a shape
 # carregar area de interesse
 def getData(shape_file, shapefile_name):
 
+  output_dir = Path("CBERS_Imagery")
+  output_dir.mkdir(parents=True, exist_ok=True)
+
   print(f'loading polygon...')
 
   #gdf = loadPolygon.getGDF('shapes\processo_850092_2020.zip')
@@ -29,7 +34,7 @@ def getData(shape_file, shapefile_name):
   search = catalog.search(
       collections=["CB4A-WPM-PCA-FUSED-1"], # colecao
       bbox=bbox,
-      datetime="2026-08-01/2026-08-30",  # intervalo das cenas
+      datetime="2022-08-01/2026-08-30",  # intervalo das cenas
   )
 
   items = list(search.items())
@@ -90,7 +95,7 @@ def getData(shape_file, shapefile_name):
               "transform": cropped_transform,
           })
 
-          output_filename = f"{shapefile_name}_cbers_{item.id}.tif"
+          output_filename = output_dir / f"{shapefile_name}_cbers_{item.id}.tif"
           with rasterio.open(output_filename, "w", **out_meta) as dest:
             dest.write(cropped_image)
 
