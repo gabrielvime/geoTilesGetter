@@ -1,3 +1,26 @@
+### Python & Ambientes Virtuais ###
+venv/
+.venv/
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+pyvenv.cfg
+pip-selfcheck.json
+__pycache__/
+*.pyc
+
+### Dados pesados e arquivos temporários ###
+/shapes/
+*.log
+tempCodeRunnerFile.py
+.DS_Store
+.vscode/
+.idea/
+
 # Created by https://www.toptal.com/developers/gitignore/api/images,video,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=images,video,venv
 
