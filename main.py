@@ -19,7 +19,7 @@ if __name__ == "__main__":
     shapefile_path = 'shapes/'
     
     # SOURCES
-    source = 0
+    source = 1
     zoom = 16 #for google xyz tiles
 
     shapes_list = os.listdir(shapefile_path)
@@ -30,11 +30,11 @@ if __name__ == "__main__":
 
         if source == 0: 
             print(f'getting CBERS Imagery...')
-            cbers.getData(gdf, shapefile_name)
+            cbers.getData(gdf, shapefile_name, True, "red", 2, 1.30)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')
-            googlexyz.getData(gdf, zoom, shapefile_name)
+            googlexyz.getData(gdf, zoom, shapefile_name, True, "red", 2, 1.10)
 
         #getGeoTiles.getData(shapefile_path + "/" + shape, zoom)
     
