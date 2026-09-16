@@ -16,10 +16,14 @@ if __name__ == "__main__":
     #### SETUP ####
     
     # shapes location
-    shapefile_path = 'shapes/'
+    shapefile_path = 'shapes'
+
+    # CBERS CONFIGURATION
+    
+    
     
     # SOURCES
-    source = 1
+    source = 0
     zoom = 16 #for google xyz tiles
 
     shapes_list = os.listdir(shapefile_path)
@@ -30,7 +34,7 @@ if __name__ == "__main__":
 
         if source == 0: 
             print(f'getting CBERS Imagery...')
-            cbers.getData(gdf, shapefile_name, True, "red", 2, 1.30)
+            cbers.getData(gdf, shapefile_name, getAll=True, draw_polygon=False, polygon_color="red", line_width=2, expand_factor=1.30)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')

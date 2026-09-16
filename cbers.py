@@ -3,13 +3,13 @@ from pystac_client import Client
 import rasterio
 from rasterio.features import rasterize
 import numpy as np
-from shapely.geometry import box
+from shapely.geometry import box, shape
 
 '''
 Get CBERS imagery from a shape with optional polygon border overlay
 '''
 
-def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', line_width=2, expand_factor=1.30):
+def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon_color='red', line_width=1, expand_factor=1.30):
 
     output_dir = Path("CBERS_Imagery")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -19,7 +19,7 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
     bbox = gdf.total_bounds
 
     # API STAC do INPE
-    print(f'connecting to INPE...')
+    print(f'connecting to source...')
     catalog = Client.open("https://data.inpe.br/bdc/stac/v1")
 
     search = catalog.search(
@@ -29,14 +29,37 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
     )
 
     items = list(search.items())
+    
+    print()
+    print(f'getting scenes from:')
+    print(f'collection: {items[0].collection_id}')
+    print(f'datetime:{items[0].datetime} to {items[len(items) - 1].datetime}')
+    print(f'local: {shapefile_name}')
+    print()
 
     if not items:
-        print("Nenhuma cena encontrada para os parâmetros informados.")
+        print(f'no scenes obtained from given parameters')
         return
 
     success = False
-
+    print(f'total scenes received: {len(items)}')
+    print(f'processing fromm newest to oldest...')    
+    items.sort(key=lambda x: x.datetime, reverse=True)
+    
     for item in items:
+
+        scene = 1
+        
+        print(f'processing {item.id}')
+
+        ###
+        # verify if receivbed data is valid
+        print(f'verifing received scene data...')
+        item_footprint = shape(item.geometry)
+        if not gdf.geometry.unary_union.within(item_footprint):
+            print(f'no valide data...')
+            continue
+
         asset_key = next(
             (k for k in ["visual", "data", "render"] if k in item.assets),
             list(item.assets.keys())[0],
@@ -45,14 +68,17 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
 
         try:
             with rasterio.open(asset_href) as src:
-                # Reprojetar o polígono para o CRS nativo do raster
+                
+
                 gdf_proj = gdf.to_crs(src.crs)
 
-                raster_box = box(*src.bounds)
-                if not gdf_proj.geometry.unary_union.intersects(raster_box):
-                    continue
-
-                # Calcular limites do polígono e expandir 30% a partir do centro
+                ###
+                # calculates the polygon's limits with expanction factor
+                # IMPORTANT
+                # if the retrieved data gonna be used for traing
+                # its crucial that they all are in normalized size
+                # adjuste this with caution to ensure the desired normalization
+                print(f'calculating scene bounds...')
                 minx, miny, maxx, maxy = gdf_proj.total_bounds
                 width = maxx - minx
                 height = maxy - miny
@@ -60,6 +86,7 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
                 cx = (minx + maxx) / 2
                 cy = (miny + maxy) / 2
 
+                # tenho que transformar isso num quadrado
                 exp_width = width * expand_factor
                 exp_height = height * expand_factor
 
@@ -68,17 +95,33 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
                 exp_miny = cy - (exp_height / 2)
                 exp_maxy = cy + (exp_height / 2)
 
-                # Criar janela retangular expandida
+                
                 window = rasterio.windows.from_bounds(
                     exp_minx, exp_miny, exp_maxx, exp_maxy, src.transform
                 )
 
+                ###
+                # crop image
+                print(f'croping image...')
                 cropped_image = src.read(window=window, boundless=True, fill_value=0)
                 cropped_transform = rasterio.windows.transform(window, src.transform)
 
-                # --- DESENHO DO POLÍGONO ---
+                ###
+                # verify data integrity
+                print(f'verifing data integrity...')
+                total_pixels = cropped_image[0].size
+                empty_pixels = np.count_nonzero(cropped_image[0] == 0)
+                if (empty_pixels / total_pixels) > 0.10:
+                    print(f'scene integrity compromissed...')
+                    print(f'skipping...')
+                    continue
+
+                ###
+                # draw polygon
                 if draw_polygon:
                     # Cria linhas/bordas a partir dos polígonos
+
+                    print(f'drawing polygon...')
                     boundaries = gdf_proj.geometry.boundary
                     
                     # Se a linha for mais larga que 1px, aplica buffer
@@ -109,6 +152,9 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
                     for band_idx in range(min(num_channels, 3)):
                         cropped_image[band_idx][polygon_mask] = rgb_color[band_idx]
 
+                ###
+                # file saving
+                print(f'saving file...')
                 out_meta = src.meta.copy()
                 out_meta.update({
                     "height": cropped_image.shape[1],
@@ -116,19 +162,26 @@ def getData(shape_file, shapefile_name, draw_polygon=True, polygon_color='red', 
                     "transform": cropped_transform,
                 })
 
-                output_filename = output_dir / f"{shapefile_name}_cbers_{item.id}.tif"
+                output_filename = output_dir / f"{shapefile_name}_{item.id}_{scene}.tif"
                 with rasterio.open(output_filename, "w", **out_meta) as dest:
                     dest.write(cropped_image)
 
-                print(
-                    f"Sucesso! Imagem salva como {output_filename} usando a cena: {item.id}"
-                )
+                print(f'saved as {output_filename} with scene {item.id}')
                 success = True
-                break
+
+                if getAll == False:
+                    break
+                print()
+                scene += 1
+                
 
         except Exception as e:
-            print(f"Tentativa falhou na cena {item.id}: {e}")
+            print(f"failed in {item.id}: {e}")
             continue
 
+    
+    print(f'finished')
+
     if not success:
-        print("Erro: Nenhuma cena encontrada possui sobreposição geométrica direta.")
+        print("error: no scene found")
+        
