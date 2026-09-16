@@ -19,7 +19,7 @@ if __name__ == "__main__":
     shapefile_path = 'shapes'
 
     # CBERS CONFIGURATION
-    
+
     
     
     # SOURCES
@@ -34,7 +34,8 @@ if __name__ == "__main__":
 
         if source == 0: 
             print(f'getting CBERS Imagery...')
-            cbers.getData(gdf, shapefile_name, getAll=True, draw_polygon=False, polygon_color="red", line_width=2, expand_factor=1.30)
+            # messing with EXPAND FACTOR not recommended
+            cbers.getData(gdf, shapefile_name, getAll=True, TARGET_SIZE=1080, EXPAND_FACTOR=1.3)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')

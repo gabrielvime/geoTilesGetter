@@ -9,7 +9,7 @@ from shapely.geometry import box, shape
 Get CBERS imagery from a shape with optional polygon border overlay
 '''
 
-def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon_color='red', line_width=1, expand_factor=1.30):
+def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon_color='red', line_width=1, EXPAND_FACTOR=1.00, TARGET_SIZE=952):
 
     output_dir = Path("CBERS_Imagery")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -53,7 +53,7 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
         print(f'processing {item.id}')
 
         ###
-        # verify if receivbed data is valid
+        # verify if received data is valid
         print(f'verifing received scene data...')
         item_footprint = shape(item.geometry)
         if not gdf.geometry.unary_union.within(item_footprint):
@@ -79,22 +79,24 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                 # its crucial that they all are in normalized size
                 # adjuste this with caution to ensure the desired normalization
                 print(f'calculating scene bounds...')
+                # calculates width and height
                 minx, miny, maxx, maxy = gdf_proj.total_bounds
                 width = maxx - minx
                 height = maxy - miny
 
+                # centers
                 cx = (minx + maxx) / 2
                 cy = (miny + maxy) / 2
 
-                # tenho que transformar isso num quadrado
-                exp_width = width * expand_factor
-                exp_height = height * expand_factor
+                # calculates square size
+                pixel_size = src.res[0]
+                square = TARGET_SIZE * pixel_size * EXPAND_FACTOR
 
-                exp_minx = cx - (exp_width / 2)
-                exp_maxx = cx + (exp_width / 2)
-                exp_miny = cy - (exp_height / 2)
-                exp_maxy = cy + (exp_height / 2)
-
+                # new bounds
+                exp_minx = cx - (square / 2)
+                exp_maxx = cx + (square / 2)
+                exp_miny = cy - (square / 2)
+                exp_maxy = cy + (square / 2)
                 
                 window = rasterio.windows.from_bounds(
                     exp_minx, exp_miny, exp_maxx, exp_maxy, src.transform
@@ -104,6 +106,8 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                 # crop image
                 print(f'croping image...')
                 cropped_image = src.read(window=window, boundless=True, fill_value=0)
+                cropped_image = cropped_image[:,:TARGET_SIZE, :TARGET_SIZE]
+                
                 cropped_transform = rasterio.windows.transform(window, src.transform)
 
                 ###
@@ -162,7 +166,7 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                     "transform": cropped_transform,
                 })
 
-                output_filename = output_dir / f"{shapefile_name}_{item.id}_{scene}.tif"
+                output_filename = output_dir / f"{shapefile_name}_{item.id}_scene{scene}.tif"
                 with rasterio.open(output_filename, "w", **out_meta) as dest:
                     dest.write(cropped_image)
 
@@ -184,4 +188,3 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
 
     if not success:
         print("error: no scene found")
-        
