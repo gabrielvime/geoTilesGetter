@@ -21,6 +21,13 @@ tempCodeRunnerFile.py
 .vscode/
 .idea/
 
+# FOLDERS
+
+/processos_filtrados/
+/Google_Imagery/
+/CBERS_Imagery/
+/shapes/
+
 # Created by https://www.toptal.com/developers/gitignore/api/images,video,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=images,video,venv
 
@@ -123,7 +130,7 @@ pip-selfcheck.json
 
 ### SHAPES ###
 *.zip
-/shapes/
+
 
 
 ### AUX ###

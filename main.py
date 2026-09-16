@@ -35,7 +35,7 @@ if __name__ == "__main__":
         if source == 0: 
             print(f'getting CBERS Imagery...')
             # messing with EXPAND FACTOR not recommended
-            cbers.getData(gdf, shapefile_name, getAll=True, TARGET_SIZE=1080, EXPAND_FACTOR=1.3)
+            cbers.getData(gdf, shapefile_name, getAll=True, TARGET_SIZE=1080)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')

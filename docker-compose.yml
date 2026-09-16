@@ -1,0 +1,8 @@
+services:
+  geotiles:
+    build: .
+    image: geotiles-app
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONUNBUFFERED=1
