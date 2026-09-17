@@ -1,4 +1,4 @@
-import googlexyz, cbers, polygon
+import googlexyz, cbers, polygon, config
 import geopandas as gpd
 import os
 from pathlib import Path
@@ -6,39 +6,38 @@ from pathlib import Path
 
 if __name__ == "__main__":
 
-    '''
-    SOURCES:
-    0 - CBERS-4A
-    1 - Google XYZ Tiles
-    '''
+    
 
     #### SETUP ####
     
     # shapes location
-    shapefile_path = 'shapes'
+    #shapefile_path = 'shapes'
 
     # CBERS CONFIGURATION
 
     
     
-    # SOURCES
-    source = 0
+    # choice source here
+    source = 'sentinel2' 
     zoom = 16 #for google xyz tiles
 
-    shapes_list = os.listdir(shapefile_path)
+    shapes_list = os.listdir(config.SHAPE_PATH)
     for shape in shapes_list:
 
         shapefile_name = Path(shape).stem
-        gdf = polygon.gdf('shapes/' + shape)        
+        gdf = polygon.gdf(config.SHAPE_PATH + '/' + shape)        
 
-        if source == 0: 
-            print(f'getting CBERS Imagery...')
-            # messing with EXPAND FACTOR not recommended
-            cbers.getData(gdf, shapefile_name, getAll=False, draw_polygon=True)
+        if source == 'cbers': 
+            #print(f'getting CBERS Imagery...')
+            
+            cbers.getData(gdf, shapefile_name, source, getAll=False, draw_polygon=False)
 
-        elif source == 1:
+        elif source == 'google':
             print(f'getting Google XYZ Tiles...')
             googlexyz.getData(gdf, zoom, shapefile_name, True, "red", 2, 1.10)
 
+        elif source == 'sentinel2':
+
+            cbers.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False, draw_polygon=False)
         #getGeoTiles.getData(shapefile_path + "/" + shape, zoom)
     

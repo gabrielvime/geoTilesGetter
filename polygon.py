@@ -25,13 +25,13 @@ def gdf(shape_file):
     return gdf
 
 
-def draw(image, shape, transform, color, width):
+def draw(image, shape, transform):
     # Cria linhas/bordas a partir dos polígonos
 
     boundaries = shape.geometry.boundary
     
     # Se a linha for mais larga que 1px, aplica buffer
-    if width > 1:
+    if config.POLYGON_WIDTH > 1:
         pixel_size = abs(transform.a)
         boundaries = boundaries.buffer(width * pixel_size)
 
@@ -40,7 +40,7 @@ def draw(image, shape, transform, color, width):
         'red': (255, 0, 0),
         'yellow': (255, 255, 0)
     }
-    rgb_color = colors.get(color.lower(), (255, 0, 0))
+    rgb_color = colors.get(config.POLYGON_COLOR.lower(), (255, 0, 0))
 
     # Cria máscara booleana rasterizando as geometrias
     mask_shape = (image.shape[1], image.shape[2])
