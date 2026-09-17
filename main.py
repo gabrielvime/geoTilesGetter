@@ -1,7 +1,6 @@
-import googlexyz, cbers, loadPolygon
+import googlexyz, cbers, polygon
 import geopandas as gpd
 import os
-import googlexyz, cbers, loadPolygon
 from pathlib import Path
 
 
@@ -30,15 +29,16 @@ if __name__ == "__main__":
     for shape in shapes_list:
 
         shapefile_name = Path(shape).stem
-        gdf = loadPolygon.getGDF('shapes/' + shape)        
+        gdf = polygon.getGDF('shapes/' + shape)        
 
         if source == 0: 
             print(f'getting CBERS Imagery...')
             # messing with EXPAND FACTOR not recommended
-            cbers.getData(gdf, shapefile_name, getAll=True, TARGET_SIZE=1080)
+            cbers.getData(gdf, shapefile_name, getAll=False, TARGET_SIZE=1080, draw_polygon=True)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')
             googlexyz.getData(gdf, zoom, shapefile_name, True, "red", 2, 1.10)
 
         #getGeoTiles.getData(shapefile_path + "/" + shape, zoom)
+    
