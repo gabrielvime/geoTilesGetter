@@ -1,5 +1,5 @@
 # geoTilesGetter
-Scrap satellite imagery tiles from direct links
+Scrap satellite imagery tiles from direct links. Scraps the most recent one available with the least amount of cloud cover.
 
 ## Getting Started
 
@@ -11,3 +11,7 @@ To start, just run:
 ```
 docker compose run --rm geotiles python main.py
 ```
+
+## CBERS-4A
+
+Scrap imagery 
