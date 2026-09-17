@@ -70,17 +70,11 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
             with rasterio.open(asset_href) as src:
                 
 
-                gdf_proj = gdf.to_crs(src.crs)
+                gdf = gdf.to_crs(src.crs)
 
-                ###
-                # calculates the polygon's limits with expanction factor
-                # IMPORTANT
-                # if the retrieved data gonna be used for traing
-                # its crucial that they all are in normalized size
-                # adjuste this with caution to ensure the desired normalization
                 print(f'calculating scene bounds...')
                 # calculates width and height
-                minx, miny, maxx, maxy = gdf_proj.total_bounds
+                minx, miny, maxx, maxy = gdf.total_bounds
                 width = maxx - minx
                 height = maxy - miny
 
@@ -126,7 +120,7 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                     # Cria linhas/bordas a partir dos polígonos
 
                     print(f'drawing polygon...')
-                    boundaries = gdf_proj.geometry.boundary
+                    boundaries = gdf.geometry.boundary
                     
                     # Se a linha for mais larga que 1px, aplica buffer
                     if line_width > 1:
