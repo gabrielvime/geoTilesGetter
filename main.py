@@ -42,4 +42,3 @@ if __name__ == "__main__":
             googlexyz.getData(gdf, zoom, shapefile_name, True, "red", 2, 1.10)
 
         #getGeoTiles.getData(shapefile_path + "/" + shape, zoom)
-    

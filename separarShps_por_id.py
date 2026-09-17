@@ -5,23 +5,32 @@ import shutil
 
 BASE_DIR = Path(__file__).resolve().parent
 
-ZIP_FILE = BASE_DIR / "processos_filtrados" / "processos_filtrados_2026-09-14.zip"
+# 1. Localiza dinamicamente o arquivo .zip (em processos_filtrados ou shapes)
+INPUT_DIR = BASE_DIR / "processos_filtrados"
+zip_files = list(INPUT_DIR.glob("*.zip"))
+
+if not zip_files:
+    raise FileNotFoundError("Nenhum arquivo .zip foi encontrado em 'processos_filtrados' ou 'shapes'.")
+
+ZIP_FILE = zip_files[0]
+print(f"Arquivo ZIP identificado: {ZIP_FILE.name}")
+
 TEMP_DIR = BASE_DIR / "temp_extracted"
 OUTPUT_DIR = BASE_DIR / "shapes"
 
-# 1. Extrai os arquivos do ZIP para uma pasta temporária
+# 2. Extrai os arquivos do ZIP para uma pasta temporária
 print("Extraindo arquivos...")
 with zipfile.ZipFile(ZIP_FILE, 'r') as z:
     z.extractall(TEMP_DIR)
 
-# 2. Procura o arquivo .shp extraído
+# 3. Procura o arquivo .shp extraído
 shp_files = list(TEMP_DIR.rglob("*.shp"))
 if not shp_files:
-    raise FileNotFoundError("Nenhum arquivo .shp foi encontrado.")
+    raise FileNotFoundError("Nenhum arquivo .shp foi encontrado dentro do ZIP.")
 
 SHP_PATH = shp_files[0]
 
-# 3. Remove o arquivo .prj com EPSG:404000 corrompido para não quebrar o pyproj
+# 4. Remove o arquivo .prj com EPSG:404000 corrompido para não quebrar o pyproj
 prj_path = SHP_PATH.with_suffix(".prj")
 if prj_path.exists():
     prj_path.unlink()
@@ -34,7 +43,7 @@ gdf.crs = "EPSG:4674"
 
 print(f"Exportando {len(gdf)} processos para pastas individuais...")
 
-# 4. Agrupa e salva cada processo em sua subpasta
+# 5. Agrupa e salva cada processo em sua subpasta
 for proc_val, group in gdf.groupby("processo"):
     # Trata a barra (ex: 855262/1995 -> 855262_1995)
     proc_clean = str(proc_val).replace("/", "_").strip()
@@ -50,7 +59,7 @@ for proc_val, group in gdf.groupby("processo"):
 
     shutil.rmtree(id_dir)  # Remove a pasta temporária após criar o ZIP
 
-# 5. Limpa a pasta temporária de extração
+# 6. Limpa a pasta temporária de extração
 shutil.rmtree(TEMP_DIR)
 
 print(f"Concluído! Todos os {len(gdf)} arquivos foram salvos em: {OUTPUT_DIR}")
