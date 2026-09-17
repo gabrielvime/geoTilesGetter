@@ -4,8 +4,14 @@ import rasterio
 from rasterio.features import rasterize
 import numpy as np
 
+import config
 
-def getGDF(shape_file):
+'''
+Polygon functions
+'''
+
+
+def gdf(shape_file):
     '''
     Get GeoPandas GeoDataFrame in WGS84
     '''
@@ -53,3 +59,30 @@ def draw(image, shape, transform, color, width):
         image[band_idx][polygon_mask] = rgb_color[band_idx]
 
     return image
+
+def window(shape, src):
+
+    # calculates width and height
+    minx, miny, maxx, maxy = shape.total_bounds
+    width = maxx - minx
+    height = maxy - miny
+
+    # centers
+    cx = (minx + maxx) / 2
+    cy = (miny + maxy) / 2
+
+    # calculates square size
+    pixel_size = src.res[0]
+    square = config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
+
+    # new bounds
+    exp_minx = cx - (square / 2)
+    exp_maxx = cx + (square / 2)
+    exp_miny = cy - (square / 2)
+    exp_maxy = cy + (square / 2)
+    
+    window = rasterio.windows.from_bounds(
+        exp_minx, exp_miny, exp_maxx, exp_maxy, src.transform
+    )
+
+    return window

@@ -5,13 +5,13 @@ from rasterio.features import rasterize
 import numpy as np
 from shapely.geometry import box, shape
 
-import validate, polygon
+import validate, polygon, config
 
 '''
 Get CBERS imagery from a shape with optional polygon border overlay
 '''
 
-def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon_color='red', line_width=1, EXPAND_FACTOR=1.00, TARGET_SIZE=952):
+def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon_color='red', line_width=1):
 
     output_dir = Path("CBERS_Imagery")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -23,21 +23,22 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
 
     # API STAC do INPE
     print(f'connecting to source...')
-    catalog = Client.open("https://data.inpe.br/bdc/stac/v1")
+    # catalog = Client.open("https://data.inpe.br/bdc/stac/v1")
 
-    search = catalog.search(
-        collections=["CB4A-WPM-PCA-FUSED-1"],
-        bbox=bbox,
-        datetime="2022-08-01/2026-08-30",
-        query={"eo:cloud_cover": {"lt": 5} })
+    # search = catalog.search(
+    #     collections=["CB4A-WPM-PCA-FUSED-1"],
+    #     bbox=bbox,
+    #     datetime="2022-08-01/2026-08-30",
+    #     query={"eo:cloud_cover": {"lt": 5} })
 
-    items = list(search.items())
+    # items = list(search.items())
+    items = config.cbers(bbox)
     
     print()
     print(f'getting scenes from:')
     print(f'collection: {items[0].collection_id}')
     print(f'datetime:{items[0].datetime} to {items[len(items) - 1].datetime}')
-    print(f'local: {shapefile_name}')
+    print(f'shape: {shapefile_name}')
     print()
 
     if not items:
@@ -53,15 +54,8 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
 
         scene = 1
         
+        print()
         print(f'processing {item.id}')
-
-        ###
-        # verify if received data is valid
-        # print(f'verifing received scene data...')
-        # item_footprint = shape(item.geometry)
-        # if not gdf.geometry.unary_union.within(item_footprint):
-        #     print(f'no valide data...')
-        #     continue
 
         asset_key = next(
             (k for k in ["visual", "data", "render"] if k in item.assets),
@@ -75,34 +69,13 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                 gdf = gdf.to_crs(src.crs)
 
                 print(f'calculating scene bounds...')
-                # calculates width and height
-                minx, miny, maxx, maxy = gdf.total_bounds
-                width = maxx - minx
-                height = maxy - miny
+                # get polygon window
+                window = polygon.window(gdf, src)
 
-                # centers
-                cx = (minx + maxx) / 2
-                cy = (miny + maxy) / 2
-
-                # calculates square size
-                pixel_size = src.res[0]
-                square = TARGET_SIZE * pixel_size * EXPAND_FACTOR
-
-                # new bounds
-                exp_minx = cx - (square / 2)
-                exp_maxx = cx + (square / 2)
-                exp_miny = cy - (square / 2)
-                exp_maxy = cy + (square / 2)
-                
-                window = rasterio.windows.from_bounds(
-                    exp_minx, exp_miny, exp_maxx, exp_maxy, src.transform
-                )
-
-                ###
                 # crop image
                 print(f'croping image...')
                 cropped_image = src.read(window=window, boundless=True, fill_value=0)
-                cropped_image = cropped_image[:,:TARGET_SIZE, :TARGET_SIZE]
+                cropped_image = cropped_image[:,:config.RESOLUTION, :config.RESOLUTION]
                 
 
                 # image validations
@@ -120,47 +93,13 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                     continue
 
 
-                cropped_transform = rasterio.windows.transform(window, src.transform)
+                transform = rasterio.windows.transform(window, src.transform)
 
                 ###
                 # draw polygon
                 if draw_polygon:
-
-                    cropped_image = polygon.draw(cropped_image, gdf, cropped_transform, polygon_color, line_width)
-
-                #     # Cria linhas/bordas a partir dos polígonos
-
-                #     print(f'drawing polygon...')
-                #     boundaries = gdf.geometry.boundary
-                    
-                #     # Se a linha for mais larga que 1px, aplica buffer
-                #     if line_width > 1:
-                #         pixel_size = abs(cropped_transform.a)
-                #         boundaries = boundaries.buffer(line_width * pixel_size)
-
-                #     # Define a cor RGB (valores de 0 a 255)
-                #     colors = {
-                #         'red': (255, 0, 0),
-                #         'yellow': (255, 255, 0)
-                #     }
-                #     rgb_color = colors.get(polygon_color.lower(), (255, 0, 0))
-
-                #     # Cria máscara booleana rasterizando as geometrias
-                #     mask_shape = (cropped_image.shape[1], cropped_image.shape[2])
-                #     polygon_mask = rasterize(
-                #         shapes=boundaries,
-                #         out_shape=mask_shape,
-                #         transform=cropped_transform,
-                #         fill=0,
-                #         default_value=1,
-                #         dtype=np.uint8
-                #     ) > 0
-
-                #     # Aplica a cor em cada banda do array RGB recortado
-                #     num_channels = cropped_image.shape[0]
-                #     for band_idx in range(min(num_channels, 3)):
-                #         cropped_image[band_idx][polygon_mask] = rgb_color[band_idx]
-
+                    print(f'drawing polygon...')
+                    cropped_image = polygon.draw(cropped_image, gdf, transform, polygon_color, line_width)
 
 
                 ###
@@ -170,7 +109,7 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                 out_meta.update({
                     "height": cropped_image.shape[1],
                     "width": cropped_image.shape[2],
-                    "transform": cropped_transform,
+                    "transform": transform,
                 })
 
                 output_filename = output_dir / f"{shapefile_name}_{item.id}_scene{scene}.tif"
@@ -178,14 +117,14 @@ def getData(shape_file, shapefile_name, getAll=True, draw_polygon=False, polygon
                     dest.write(cropped_image)
 
                 print(f'saved as {output_filename} with scene {item.id}')
+                print()
                 success = True
 
-                if getAll == False:
+                if success and getAll == False:
                     break
                 print()
                 scene += 1
                 
-
         except Exception as e:
             print(f"failed in {item.id}: {e}")
             continue

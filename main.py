@@ -29,12 +29,12 @@ if __name__ == "__main__":
     for shape in shapes_list:
 
         shapefile_name = Path(shape).stem
-        gdf = polygon.getGDF('shapes/' + shape)        
+        gdf = polygon.gdf('shapes/' + shape)        
 
         if source == 0: 
             print(f'getting CBERS Imagery...')
             # messing with EXPAND FACTOR not recommended
-            cbers.getData(gdf, shapefile_name, getAll=False, TARGET_SIZE=1080, draw_polygon=True)
+            cbers.getData(gdf, shapefile_name, getAll=False, draw_polygon=True)
 
         elif source == 1:
             print(f'getting Google XYZ Tiles...')
