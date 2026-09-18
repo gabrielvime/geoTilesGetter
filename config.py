@@ -1,9 +1,15 @@
 from pystac_client import Client
 
 RESOLUTION = 1080           # final square resolution
-EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
+EXPAND_FACTOR = 1.3         # expansion factor (1.0 means original size), not recommended to mess with this
 SOURCES = {'cbers': 'CBERS-4A FUSED', 'sentinel2': 'Sentinel-2 L2A (AWS)', 'google': 'Google XYZ Tiles'}
 SHAPE_PATH = 'shapes'
+ZOOM = 1                   #XYZ Tiles Zoom
+SOURCE_OUTPUT = {'cbers':'CBERS_Imagery', 'google':'Google_Imagery'}
+### POLYGON DRAW SETTINGS ###
+#settings ou configurations??? novamente, meu ingles é ruim
+POLYGON_COLOR = 'red'
+POLYGON_WIDTH = 10
 
 
 ##### CBERS CONFIGURATIONS #####
@@ -33,7 +39,6 @@ def sentinel2(bbox):
     return list(search.items())
 
 
-### POLYGON DRAW SETTINGS ###
-#settings ou configurations??? novamente, meu ingles é ruim
-POLYGON_COLOR = 'red'
-POLYGON_WIDTH = 1
+##### LANDSAT 8
+
+

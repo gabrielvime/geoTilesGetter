@@ -1,63 +1,26 @@
 import os
-from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-import geopandas as gpd
+#import geopandas as gpd
 import mercantile
 import numpy as np
-import pyproj
+#import pyproj
 import rasterio
-from rasterio.features import rasterize
+#from rasterio.features import rasterize
 from rasterio.transform import from_bounds
 import requests
 from PIL import Image
 
-proj_data_path = pyproj.datadir.get_data_dir()
-os.environ["PROJ_LIB"] = proj_data_path
-os.environ["PROJ_DATA"] = proj_data_path
+import polygon, config
 
+def getData(geometryData,shapefile_name, source, draw_polygon=True):
+   
+    gdf = geometryData
 
-def getData(
-    geometryData,
-    z,
-    shapefile_name,
-    draw_polygon=True,
-    polygon_color="red",
-    line_width=2,
-    expand_factor=1.10,
-    data_imagem=None,
-):
-    output_dir = Path("Google_Imagery")
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    if not data_imagem:
-        data_imagem = datetime.now().strftime("%Y_%m")
-
-    gdf = geometryData.copy()
-
-    # 1. EXPANSÃO DO BOUNDING BOX
-    if gdf.crs != "EPSG:4326":
-        gdf_4326 = gdf.to_crs("EPSG:4326")
-    else:
-        gdf_4326 = gdf.copy()
-
-    minx, miny, maxx, maxy = gdf_4326.total_bounds
-    width = maxx - minx
-    height = maxy - miny
-
-    cx = (minx + maxx) / 2
-    cy = (miny + maxy) / 2
-
-    # Expande as dimensões a partir do centro pelo fator informado
-    exp_minx = cx - ((width * expand_factor) / 2)
-    exp_maxx = cx + ((width * expand_factor) / 2)
-    exp_miny = cy - ((height * expand_factor) / 2)
-    exp_maxy = cy + ((height * expand_factor) / 2)
-
-    zoom = z
+    minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True, xyz=True)
 
     print("fetching XYZ tiles for expanded bounds...")
-    tiles = list(mercantile.tiles(exp_minx, exp_miny, exp_maxx, exp_maxy, zoom))
+    tiles = list(mercantile.tiles(minx, miny, maxx, maxy, config.ZOOM))
 
     min_x = min(t.x for t in tiles)
     max_x = max(t.x for t in tiles)
@@ -89,8 +52,8 @@ def getData(
         i += 1
 
     print("calculating spatial bounds...")
-    top_left_bounds = mercantile.xy_bounds(min_x, min_y, zoom)
-    bottom_right_bounds = mercantile.xy_bounds(max_x, max_y, zoom)
+    top_left_bounds = mercantile.xy_bounds(min_x, min_y, config.ZOOM)
+    bottom_right_bounds = mercantile.xy_bounds(max_x, max_y, config.ZOOM)
 
     west = top_left_bounds.left
     north = top_left_bounds.top
@@ -101,36 +64,10 @@ def getData(
 
     arr = np.array(mosaic)
 
-    # 2. DESENHO OPCIONAL DO POLÍGONO
+    # polygon draw
     if draw_polygon:
-        gdf_3857 = gdf.to_crs("EPSG:3857")
-        boundaries = gdf_3857.geometry.boundary
-
-        if line_width > 1:
-            pixel_size = abs(transform.a)
-            boundaries = boundaries.buffer(line_width * pixel_size)
-
-        colors = {"red": (255, 0, 0), "yellow": (255, 255, 0)}
-        
-        # Garante o tratamento do parâmetro de cor recebido como string
-        color_key = str(polygon_color).lower()
-        rgb_color = colors.get(color_key, (255, 0, 0))
-
-        mask_shape = (img_h, img_w)
-        polygon_mask = (
-            rasterize(
-                shapes=boundaries,
-                out_shape=mask_shape,
-                transform=transform,
-                fill=0,
-                default_value=1,
-                dtype=np.uint8,
-            )
-            > 0
-        )
-
-        for band_idx in range(3):
-            arr[:, :, band_idx][polygon_mask] = rgb_color[band_idx]
+        print(f'drawing polygon...')
+        arr = polygon.draw(image=arr, shape=geometryData, transform=transform, xyz=True, crs="EPSG:3857")
 
     tif_meta = {
         "driver": "GTiff",
@@ -142,7 +79,7 @@ def getData(
         "transform": transform,
     }
 
-    output_filepath = output_dir / f"{shapefile_name}_z{z}_{data_imagem}.tif"
+    output_filepath = config.SOURCE_OUTPUT.get(source) + '/' f"{shapefile_name}_z{config.ZOOM}.tif"
 
     print(f"exporting to {output_filepath}...")
     with rasterio.open(output_filepath, "w", **tif_meta) as dst:

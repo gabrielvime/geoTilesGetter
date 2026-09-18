@@ -21,7 +21,7 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
     bbox = gdf.total_bounds
     print(f'shape: {shapefile_name}')
 
-    # API STAC do INPE
+    # 
     print(f'connecting to source...')
 
     if source =='cbers':
@@ -96,15 +96,12 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
                     print(f'skipping...')
                     continue
 
-
                 transform = rasterio.windows.transform(window, src.transform)
 
-                ###
                 # draw polygon
                 if draw_polygon:
                     print(f'drawing polygon...')
                     cropped_image = polygon.draw(cropped_image, gdf, transform)
-
 
                 ###
                 # file saving
