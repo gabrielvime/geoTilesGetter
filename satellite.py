@@ -57,7 +57,6 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
 
         elif source == 'cbers':
             
-            
             print()
             print(f'processing {item.id}')
 

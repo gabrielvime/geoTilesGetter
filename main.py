@@ -7,7 +7,7 @@ from pathlib import Path
 if __name__ == "__main__":
     
     # choice source here
-    source = 'google' 
+    source = 'bing' 
 
     shapes_list = os.listdir(config.SHAPE_PATH)
     for shape in shapes_list:
@@ -22,10 +22,12 @@ if __name__ == "__main__":
             print(f'getting Google XYZ Tiles...')
             xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name, draw_polygon=True)
             
-
         elif source == 'sentinel2':
             satellite.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False, draw_polygon=False)
         
-        #elif source == 'google':
-            
+        elif source=='bing':
+            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source)
+        
+        elif source=='arcgis':
+            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source, draw_polygon=True)
     

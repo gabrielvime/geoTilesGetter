@@ -34,10 +34,19 @@ def getData(geometryData,shapefile_name, source, draw_polygon=True):
 
     i = 1
     ntiles = len(tiles)
-    print("downloading Google Satellite XYZ Tiles...")
+    print(f'getting scenes from:')
+    print(f'SOURCE: {config.SOURCES.get(source)}')
     for t in tiles:
         print(f"tile {i} of {ntiles}")
-        url = f"https://mt0.google.com/vt/lyrs=s&x={t.x}&y={t.y}&z={t.z}"
+         
+        if source == 'google':
+            url = config.google(t.x, t.y, t.z)
+        elif source == 'arcgis':
+            url = config.arcgis(t.x, t.y, t.z)
+        elif source == 'bing':
+            url = config.bing(t.x, t.y, t.z)
+            
+
         response = requests.get(url)
 
         if response.status_code == 200:
