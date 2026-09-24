@@ -7,7 +7,7 @@ from pathlib import Path
 if __name__ == "__main__":
     
     # choice source here
-    source = 'bing' 
+    source = 'cbers' 
 
     shapes_list = os.listdir(config.SHAPE_PATH)
     for shape in shapes_list:

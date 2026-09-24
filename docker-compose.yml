@@ -1,7 +1,7 @@
 services:
-  geotiles:
+  geotilesgetter:
     build: .
-    image: geotiles-app
+    #image: geotilesgetter-app
     volumes:
       - .:/app
     environment:

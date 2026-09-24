@@ -6,7 +6,7 @@ import shutil
 BASE_DIR = Path(__file__).resolve().parent
 
 # 1. Localiza dinamicamente o arquivo .zip (em processos_filtrados ou shapes)
-INPUT_DIR = BASE_DIR / "processos_filtrados"
+INPUT_DIR = BASE_DIR / "processos"
 zip_files = list(INPUT_DIR.glob("*.zip"))
 
 if not zip_files:

@@ -1,7 +1,7 @@
 [project]
 name = "geoTilesGetter"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "geopandas==1.1.4",
     "mercantile==1.2.1",

@@ -1,5 +1,4 @@
 from pathlib import Path
-#from pystac_client import Client
 import rasterio
 from rasterio.features import rasterize
 import numpy as np

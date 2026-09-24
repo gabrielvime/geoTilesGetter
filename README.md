@@ -9,7 +9,7 @@ Adjust `config.py` to your work
 
 To start, just run:
 ```
-docker compose run --rm geotiles python main.py
+docker compose run --rm geotilesgetter python main.py
 ```
 
 ## CBERS-4A

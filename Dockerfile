@@ -1,5 +1,5 @@
 # stage 1 uv builder'
-FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -12,19 +12,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-
 COPY pyproject.toml .
 
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv venv /app/.venv && \
-    uv pip install --no-cache -r pyproject.toml
+RUN uv venv /opt/venv
+
+RUN uv pip install --python /opt/venv --no-cache-dir -r pyproject.toml
 
 # stage 2
-FROM python:3.11-slim-bookworm AS runner
+FROM python:3.12-slim-bookworm AS runner
 
 WORKDIR /app
 
-ENV PATH="/app/.venv/bin:$PATH" \
+ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -33,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgeos-c1v5 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /opt/venv /opt/venv
 
 COPY . /app
 
