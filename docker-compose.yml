@@ -1,7 +1,7 @@
 services:
   geotilesgetter:
     build: .
-    #image: geotilesgetter-app
+    user: "${UID:-1000}:${GID:-1000}" # to not run as root and mess like i did
     volumes:
       - .:/app
     environment:
