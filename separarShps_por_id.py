@@ -10,7 +10,7 @@ INPUT_DIR = BASE_DIR / "processos"
 zip_files = list(INPUT_DIR.glob("*.zip"))
 
 if not zip_files:
-    raise FileNotFoundError("Nenhum arquivo .zip foi encontrado em 'processos_filtrados' ou 'shapes'.")
+    raise FileNotFoundError("Nenhum arquivo .zip foi encontrado em 'processos' ou 'shapes'.")
 
 ZIP_FILE = zip_files[0]
 print(f"Arquivo ZIP identificado: {ZIP_FILE.name}")
@@ -43,12 +43,29 @@ gdf.crs = "EPSG:4674"
 
 print(f"Exportando {len(gdf)} processos para pastas individuais...")
 
+print("=-"*70)
+entrada_usuario = input("Digite o número inicial para a sequência dos shapes (ex: 340 gerará 340, 341, 342...). Para usar o padrão, apenas pressione Enter: ")
+print("=-"*70)
+number = int(entrada_usuario) if entrada_usuario.strip() else None
+
 # 5. Agrupa e salva cada processo em sua subpasta
 for proc_val, group in gdf.groupby("processo"):
-    # Trata a barra (ex: 855262/1995 -> 855262_1995)
+    # Trata a barra (ex: 855262/1995 -> 855262_1995 ou 1/2026 -> 1_2026)
     proc_clean = str(proc_val).replace("/", "_").strip()
     
-    folder_name = f"processo_{proc_clean}"
+    if number is not None:
+        try:
+            prefixo, ano = proc_clean.split("_", 1)
+            
+            novo_prefixo = int(prefixo) + number - 1
+            
+            proc_final = f"{novo_prefixo}_{ano}"
+        except ValueError:
+            proc_final = proc_clean
+    else:
+        proc_final = proc_clean
+
+    folder_name = f"processo_{proc_final}"
     id_dir = OUTPUT_DIR / folder_name
     id_dir.mkdir(parents=True, exist_ok=True)
 
@@ -56,9 +73,7 @@ for proc_val, group in gdf.groupby("processo"):
     group.to_file(out_file, encoding="utf-8")
 
     shutil.make_archive(OUTPUT_DIR / folder_name, 'zip', id_dir)
-
     shutil.rmtree(id_dir)  # Remove a pasta temporária após criar o ZIP
-
 # 6. Limpa a pasta temporária de extração
 shutil.rmtree(TEMP_DIR)
 
