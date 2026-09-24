@@ -28,6 +28,10 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
     elif source == 'sentinel2':
         items = config.sentinel2(bbox=bbox)
     
+    if not items:
+        print(f'no scenes obtained from given parameters')
+        return
+
     print()
     print(f'getting scenes from:')
     print(f'SOURCE: {config.SOURCES.get(source)}')
@@ -36,9 +40,6 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
     print(f'SHAPE: {shapefile_name}')
     print()
 
-    if not items:
-        print(f'no scenes obtained from given parameters')
-        return
 
     success = False
     print(f'total scenes received: {len(items)}')
@@ -83,7 +84,7 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
                 # image validations
                      
                 print(f'checking cloud cover...')
-                if not validate.cloudFilter(cropped_image, cloud_threshold=0.15):
+                if not validate.cloudFilter(cropped_image, cloud_threshold=0.05, contrast_threshold=10.0, blur_threshold=10.0):
                     print(f'cloud covered...')
                     print(f'skipping...')
                     continue
