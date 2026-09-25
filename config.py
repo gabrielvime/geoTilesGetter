@@ -8,6 +8,7 @@ ZOOM = 19            #XYZ Tiles Zoom
 SOURCE_OUTPUT = {'cbers':'CBERS_Imagery', 'google':'Google_Imagery', 'sentinel2':'Sentinel2_Imagery', 'bing':'Bing_Imagery'}
 ### POLYGON DRAW SETTINGS ###
 #settings ou configurations??? novamente, meu ingles é ruim
+DRAW_POLYGON=False
 POLYGON_COLOR = 'red'
 POLYGON_WIDTH = 1
 DATETIME='2022-08-01/2026-08-30'

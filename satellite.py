@@ -10,7 +10,7 @@ import validate, polygon, config
 Get imagery from a shape with optional polygon border overlay
 '''
 
-def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False):
+def getData(shape_file, shapefile_name, source, getAll=True):
 
     output_dir = Path("CBERS_Imagery")
     output_dir.mkdir(parents=True, exist_ok=True)
