@@ -98,7 +98,7 @@ def getData(shape_file, shapefile_name, source, getAll=True, draw_polygon=False)
                 transform = rasterio.windows.transform(window, src.transform)
 
                 # draw polygon
-                if draw_polygon:
+                if config.DRAW_POLYGON:
                     print(f'drawing polygon...')
                     cropped_image = polygon.draw(cropped_image, gdf, transform)
 
