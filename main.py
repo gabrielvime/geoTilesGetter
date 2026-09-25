@@ -18,9 +18,9 @@ if __name__ == "__main__":
         if source == 'cbers': 
             satellite.getData(gdf, shapefile_name, source, getAll=False, draw_polygon=True)
 
-        elif source == 'google':
+        elif source == 'google':                                                
             print(f'getting Google XYZ Tiles...')
-            xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name, draw_polygon=True)
+            xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name, draw_polygon=False)
             
         elif source == 'sentinel2':
             satellite.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False, draw_polygon=False)
