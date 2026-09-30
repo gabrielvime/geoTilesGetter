@@ -9,7 +9,7 @@ Adjust `config.py` to your work
 
 To start, just run:
 ```
-docker compose run --rm geotilesgetter python main.py
+docker compose run --rm geotilesgetter python main.py --source='DESIRED_SOURCE'
 ```
 
 ## CBERS-4A
