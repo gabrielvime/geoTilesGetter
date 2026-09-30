@@ -12,9 +12,6 @@ Get imagery from a shape with optional polygon border overlay
 
 def getData(shape_file, shapefile_name, source, getAll=True):
 
-    output_dir = Path("CBERS_Imagery")
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     print(f'loading polygon...')
     gdf = shape_file
     bbox = gdf.total_bounds
@@ -34,7 +31,7 @@ def getData(shape_file, shapefile_name, source, getAll=True):
 
     print()
     print(f'getting scenes from:')
-    print(f'SOURCE: {config.SOURCES.get(source)}')
+    print(f'SOURCE: {config.SOURCES.get(source)[0]}')
     print(f'COLLECTION: {items[0].collection_id}')
     print(f'DATE FRAME:{items[0].datetime} to {items[len(items) - 1].datetime}')
     print(f'SHAPE: {shapefile_name}')
@@ -75,6 +72,7 @@ def getData(shape_file, shapefile_name, source, getAll=True):
                 window = polygon.window(gdf, src, max_size=config.MAX_SIZE)
 
                 # get image
+                print(f'getting image...')
                 image = src.read(window=window, boundless=True, fill_value=0)
                 
                 if not config.MAX_SIZE:
@@ -124,7 +122,7 @@ def getData(shape_file, shapefile_name, source, getAll=True):
                 if success and getAll == False:
                     break
                 print()
-                scene += 1
+                
                 
         except Exception as e:
             print(f"failed in {item.id}: {e}")

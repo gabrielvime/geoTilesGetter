@@ -1,12 +1,9 @@
 import os
 from io import BytesIO
 from pathlib import Path
-#import geopandas as gpd
 import mercantile
 import numpy as np
-#import pyproj
 import rasterio
-#from rasterio.features import rasterize
 from rasterio.transform import from_bounds
 import requests
 from PIL import Image
@@ -35,7 +32,7 @@ def getData(geometryData,shapefile_name, source, draw_polygon=True):
     i = 1
     ntiles = len(tiles)
     print(f'getting scenes from:')
-    print(f'SOURCE: {config.SOURCES.get(source)}')
+    print(f'SOURCE: {config.SOURCES.get(source)[0]}')
     for t in tiles:
         print(f"tile {i} of {ntiles}")
          
@@ -88,7 +85,7 @@ def getData(geometryData,shapefile_name, source, draw_polygon=True):
         "transform": transform,
     }
 
-    output_filepath = config.SOURCE_OUTPUT.get(source) + '/' f"{shapefile_name}_z{config.ZOOM}.tif"
+    output_filepath = config.SOURCES.get(source)[1] + '/' f"{shapefile_name}_z{config.ZOOM}.tif"
 
     print(f"exporting to {output_filepath}...")
     with rasterio.open(output_filepath, "w", **tif_meta) as dst:

@@ -6,7 +6,12 @@ import argparse
 
 def main(source):
 
+    print(f'path: {config.SOURCES.get(source)[1]}')
+    output_dir = Path(config.SOURCES.get(source)[1])
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     shapes_list = os.listdir(config.SHAPE_PATH)
+
     for shape in shapes_list:
 
         shapefile_name = Path(shape).stem
