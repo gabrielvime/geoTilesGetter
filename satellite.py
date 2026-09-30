@@ -45,7 +45,6 @@ def getData(shape_file, shapefile_name, source, getAll=True):
     print(f'total scenes received: {len(items)}')
     print(f'processing fromm newest to oldest...')    
     items.sort(key=lambda x: x.datetime, reverse=True)
-    scene = 1
     
     for item in items:
 
@@ -73,24 +72,26 @@ def getData(shape_file, shapefile_name, source, getAll=True):
 
                 print(f'calculating scene bounds...')
                 # get polygon window
-                window = polygon.window(gdf, src)
+                window = polygon.window(gdf, src, max_size=config.MAX_SIZE)
 
-                # crop image
-                print(f'croping image...')
-                cropped_image = src.read(window=window, boundless=True, fill_value=0)
-                cropped_image = cropped_image[:,:config.RESOLUTION, :config.RESOLUTION]
+                # get image
+                image = src.read(window=window, boundless=True, fill_value=0)
+                
+                if not config.MAX_SIZE:
+                    print(f'croping image...')
+                    image = image[:,:config.RESOLUTION, :config.RESOLUTION]
                 
 
                 # image validations
                      
                 print(f'checking cloud cover...')
-                if not validate.cloudFilter(cropped_image, cloud_threshold=0.05, contrast_threshold=10.0, blur_threshold=10.0):
+                if not validate.cloudFilter(image, cloud_threshold=0.05, contrast_threshold=10.0, blur_threshold=10.0):
                     print(f'cloud covered...')
                     print(f'skipping...')
                     continue
                 
                 print(f'verifing data integrity...')
-                if not validate.dataIntegrity(cropped_image, threshold=0.05):
+                if not validate.dataIntegrity(image, threshold=0.05):
                     print(f'scene integrity compromissed..')
                     print(f'skipping...')
                     continue
@@ -100,21 +101,21 @@ def getData(shape_file, shapefile_name, source, getAll=True):
                 # draw polygon
                 if config.DRAW_POLYGON:
                     print(f'drawing polygon...')
-                    cropped_image = polygon.draw(cropped_image, gdf, transform)
+                    image = polygon.draw(image, gdf, transform)
 
                 ###
                 # file saving
                 print(f'saving file...')
                 out_meta = src.meta.copy()
                 out_meta.update({
-                    "height": cropped_image.shape[1],
-                    "width": cropped_image.shape[2],
+                    "height": image.shape[1],
+                    "width": image.shape[2],
                     "transform": transform,
                 })
 
-                output_filename = output_dir / f"{shapefile_name}_{item.id}_scene{scene}.tif"
+                output_filename = output_dir / f"{shapefile_name}_{item.id}.tif"
                 with rasterio.open(output_filename, "w", **out_meta) as dest:
-                    dest.write(cropped_image)
+                    dest.write(image)
 
                 print(f'saved as {output_filename} with scene {item.id}')
                 print()

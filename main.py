@@ -16,7 +16,7 @@ if __name__ == "__main__":
         gdf = polygon.gdf4326(config.SHAPE_PATH + '/' + shape)        
 
         if source == 'cbers': 
-            satellite.getData(gdf, shapefile_name, source, getAll=False, draw_polygon=True)
+            satellite.getData(gdf, shapefile_name, source, getAll=False)
 
         elif source == 'google':                                                
             print(f'getting Google XYZ Tiles...')

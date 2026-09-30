@@ -32,7 +32,7 @@ def cloudFilter(image, cloud_threshold=0.10, shadow_threshold=0.3, contrast_thre
 
     # contrast filter
     contrast = np.std(bright)
-    print(f'contrsta: {contrast}')
+    #print(f'contrsta: {contrast}')
     
     if contrast < contrast_threshold:
         return False
@@ -45,7 +45,7 @@ def cloudFilter(image, cloud_threshold=0.10, shadow_threshold=0.3, contrast_thre
     
     # border variance
     sharpness = np.var(gnorm)
-    print(f'sharpness: {sharpness}')
+    #print(f'sharpness: {sharpness}')
     
     if sharpness < blur_threshold:
         return False

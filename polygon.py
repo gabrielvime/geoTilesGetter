@@ -73,7 +73,7 @@ def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
 
     return image
 
-def window(shape, src, min_max=False, xyz=False):
+def window(shape, src, max_size=True, min_max=False, xyz=False):
     '''
     Return bounding window fo given gdf shape
     if min_max, return minX, maX, minY, maxY
@@ -98,13 +98,21 @@ def window(shape, src, min_max=False, xyz=False):
    
     else:
         pixel_size = src.res[0]
-        square = config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
+
+        if max_size:
+            # gets the max value betwen width and height and makes the square by them
+            square = max(width, height) * pixel_size * config.EXPAND_FACTOR
+        else:
+            # makes the square for the desired reosolution
+            square = config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
         
         exp_minx = cx - (square / 2)
         exp_maxx = cx + (square / 2)
         exp_miny = cy - (square / 2)
         exp_maxy = cy + (square / 2)
-        
+
+    #print(f'width: {exp_maxx - exp_minx}')
+    #print(f'height: {exp_maxy - exp_miny}')        
     if min_max:
         return exp_minx, exp_maxx, exp_miny, exp_maxy
 
