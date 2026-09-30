@@ -5,8 +5,8 @@ Configurations file
 from pystac_client import Client
 
 SOURCES = {
-    'cbers': ['CBERS-4A FUSED', 'CBERS_Imagery'], 
-    'sentinel2': ['Sentinel-2 L2A (AWS)', 'Sentinel2_Imagery'], 
+    'cbers': ['CBERS-4A FUSED', 'cbers_imagery'], 
+    'sentinel2': ['Sentinel-2 L2A (AWS)', 'sentinel2_imagery'],
     'google': ['Google XYZ Tiles', 'Google_Imagery'],
     'bing':'Bing'}
 """'source':['Source Name','source_path']"""
@@ -16,10 +16,10 @@ EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not re
 SHAPE_PATH = 'shapes'
 ZOOM = 16            #XYZ Tiles Zoom
 DATETIME='2022-08-01/2026-08-30'
-MAX_SIZE=True
+MAX_SIZE=False
 
 ### POLYGON DRAW CONFIGURATIONS ##
-DRAW_POLYGON=True
+DRAW_POLYGON=False
 POLYGON_COLOR = 'red'
 POLYGON_WIDTH = 1
 
@@ -49,22 +49,6 @@ def sentinel2(bbox):
     )
 
     return list(search.items())
-
-
-##### LANDSAT 8
-
-def landsat8(bbox):
-    catalog = Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")  
-
-    search = catalog.search(
-    collections=["sentinel-2-l2a"],
-    bbox=bbox,
-    datetime=DATETIME,
-    query={"eo:cloud_cover": {"lt": 10}}  # cloud filter
-    )
-
-    return list(search.items())
-
 
 #### ARC-GIS
 def arcgis(x, y, z):

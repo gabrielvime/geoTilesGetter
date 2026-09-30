@@ -17,28 +17,22 @@ def main(source):
         shapefile_name = Path(shape).stem
         gdf = polygon.gdf4326(config.SHAPE_PATH + '/' + shape)        
 
-        if source == 'cbers': 
+        satellites = ['cbers', 'sentinel2']
+        xyz = ['google', 'bing', 'arcgis']
+
+        if source in satellites:
             satellite.getData(gdf, shapefile_name, source, getAll=False)
-
-        elif source == 'google':                                                
-            print(f'getting Google XYZ Tiles...')
+        elif source in xyz:
             xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name)
-            
-        elif source == 'sentinel2':
-            satellite.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False)
+        else:
+            print(f'invalide source')
         
-        elif source=='bing':
-            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source)
-        
-        elif source=='arcgis':
-            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source)
-
 
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='get sattellite imagery from desired source')
 
-    parser.add_argument('--source', type=str, required=True, help='cbers, google, ...')
+    parser.add_argument('--source', type=str, required=True, help='cbers, google, sentinel2...')
 
     args = parser.parse_args()
 

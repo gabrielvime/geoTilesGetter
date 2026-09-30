@@ -17,7 +17,6 @@ def getData(shape_file, shapefile_name, source, getAll=True):
     bbox = gdf.total_bounds
     print(f'shape: {shapefile_name}')
 
-    # 
     print(f'connecting to source...')
 
     if source =='cbers':
