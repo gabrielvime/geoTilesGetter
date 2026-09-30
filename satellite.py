@@ -99,7 +99,8 @@ def getData(shape_file, shapefile_name, source, getAll=True):
                 # draw polygon
                 if config.DRAW_POLYGON:
                     print(f'drawing polygon...')
-                    image = polygon.draw(image, gdf, transform)
+                    image = polygon.draw(image, gdf, transform,crs=gdf.crs)
+                    
 
                 ###
                 # file saving
@@ -111,7 +112,7 @@ def getData(shape_file, shapefile_name, source, getAll=True):
                     "transform": transform,
                 })
 
-                output_filename = output_dir / f"{shapefile_name}_{item.id}.tif"
+                output_filename = config.SOURCES.get(source)[1] + '/' + f"{shapefile_name}_{item.id}.tif"
                 with rasterio.open(output_filename, "w", **out_meta) as dest:
                     dest.write(image)
 

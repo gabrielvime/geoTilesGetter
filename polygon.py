@@ -26,9 +26,9 @@ def gdf4326(shape_file):
 
 
 def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
-    '''
+    """
     Draw polygon shape
-    '''
+    """
     # Cria linhas/bordas a partir dos polígonos
 
     shape = shape.to_crs(crs)
@@ -42,10 +42,11 @@ def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
     # Define a cor RGB (valores de 0 a 255)
     colors = {
         'red': (255, 0, 0),
-        'yellow': (255, 255, 0)
+        'yellow': (255, 255, 0),
+        'blue': (255, 255, 255)
     }
     rgb_color = colors.get(config.POLYGON_COLOR.lower(), (255, 0, 0))
-
+    
     # Cria máscara booleana rasterizando as geometrias
     if xyz:
         mask_shape = (image.shape[0], image.shape[1])
@@ -62,15 +63,12 @@ def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
     ) > 0
 
     # Aplica a cor em cada banda do array RGB recortado
-    #num_channels = image.shape[0]
-    
     for band_idx in range(3):
         if xyz:
             image[:, :, band_idx][polygon_mask] = rgb_color[band_idx]
         else:
             image[band_idx][polygon_mask] = rgb_color[band_idx]
         
-
     return image
 
 def window(shape, src, max_size=True, min_max=False, xyz=False):

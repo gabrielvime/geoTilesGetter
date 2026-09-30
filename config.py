@@ -1,16 +1,23 @@
+"""
+Configurations file
+"""
+
 from pystac_client import Client
 
-RESOLUTION = 1024           # final square resolution
-EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
 SOURCES = {
     'cbers': ['CBERS-4A FUSED', 'CBERS_Imagery'], 
     'sentinel2': ['Sentinel-2 L2A (AWS)', 'Sentinel2_Imagery'], 
     'google': ['Google XYZ Tiles', 'Google_Imagery'],
     'bing':'Bing'}
+"""'source':['Source Name','source_path']"""
+
+RESOLUTION = 1024           # final square resolution
+EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
 SHAPE_PATH = 'shapes'
-ZOOM = 13            #XYZ Tiles Zoom
+ZOOM = 16            #XYZ Tiles Zoom
 DATETIME='2022-08-01/2026-08-30'
 MAX_SIZE=True
+
 ### POLYGON DRAW CONFIGURATIONS ##
 DRAW_POLYGON=True
 POLYGON_COLOR = 'red'

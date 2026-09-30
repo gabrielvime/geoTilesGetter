@@ -10,7 +10,7 @@ from PIL import Image
 
 import polygon, config
 
-def getData(geometryData,shapefile_name, source, draw_polygon=True):
+def getData(geometryData, shapefile_name, source):
    
     gdf = geometryData
 
@@ -71,7 +71,8 @@ def getData(geometryData,shapefile_name, source, draw_polygon=True):
     arr = np.array(mosaic)
 
     # polygon draw
-    if draw_polygon:
+    if config.DRAW_POLYGON:
+        print(gdf.crs)
         print(f'drawing polygon...')
         arr = polygon.draw(image=arr, shape=geometryData, transform=transform, xyz=True, crs="EPSG:3857")
 
