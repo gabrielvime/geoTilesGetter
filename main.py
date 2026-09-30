@@ -6,9 +6,9 @@ import argparse
 
 def main(source):
 
-    print(f'path: {config.SOURCES.get(source)[1]}')
-    output_dir = Path(config.SOURCES.get(source)[1])
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if source!='all':
+        output_dir = Path(config.SOURCES.get(source)[1])
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     shapes_list = os.listdir(config.SHAPE_PATH)
 
@@ -18,12 +18,24 @@ def main(source):
         gdf = polygon.gdf4326(config.SHAPE_PATH + '/' + shape)        
 
         satellites = ['cbers', 'sentinel2']
-        xyz = ['google', 'bing', 'arcgis']
+        xyz = ['google', 'bing']
 
         if source in satellites:
-            satellite.getData(gdf, shapefile_name, source, getAll=False)
+            satellite.getData(gdf, shapefile_name, source=source, getAll=False)
+       
         elif source in xyz:
             xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name)
+       
+        elif source=='all':
+            for s in satellites:
+                output_dir = Path(config.SOURCES.get(s)[1])
+                output_dir.mkdir(parents=True, exist_ok=True)
+                satellite.getData(gdf, shapefile_name, source=s, getAll=False)
+            for s in xyz:
+                output_dir = Path(config.SOURCES.get(s)[1])
+                output_dir.mkdir(parents=True, exist_ok=True)
+                xyzTiles.getData(geometryData=gdf, source=s, shapefile_name=shapefile_name)
+       
         else:
             print(f'invalide source')
         
