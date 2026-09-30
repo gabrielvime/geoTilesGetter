@@ -22,16 +22,16 @@ def main(source):
 
         elif source == 'google':                                                
             print(f'getting Google XYZ Tiles...')
-            xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name, draw_polygon=False)
+            xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name)
             
         elif source == 'sentinel2':
-            satellite.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False, draw_polygon=False)
+            satellite.getData(gdf, shapefile_name=shapefile_name, source=source, getAll=False)
         
         elif source=='bing':
             xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source)
         
         elif source=='arcgis':
-            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source, draw_polygon=True)
+            xyzTiles.getData(geometryData=gdf, shapefile_name=shapefile_name, source=source)
 
 
 if __name__ == "__main__":
