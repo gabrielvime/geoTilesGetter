@@ -12,6 +12,10 @@ import polygon, config
 
 def getData(geometryData, shapefile_name, source):
    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
     gdf = geometryData
 
     minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True, xyz=True)
@@ -37,14 +41,15 @@ def getData(geometryData, shapefile_name, source):
         print(f"tile {i} of {ntiles}")
          
         if source == 'google':
-            url = config.google(t.x, t.y, t.z)
+            #url = config.google(t.x, t.y, t.z)
+            url = f"https://mt0.google.com/vt/lyrs=s&x={t.x}&y={t.y}&z={t.z}"
         elif source == 'arcgis':
             url = config.arcgis(t.x, t.y, t.z)
         elif source == 'bing':
-            url = config.bing(t.x, t.y, t.z)
+            qk = mercantile.quadkey(t)
+            url = f"https://ecn.t1.tiles.virtualearth.net/tiles/a{qk}.jpeg?g=136"
             
-
-        response = requests.get(url)
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             tile_img = Image.open(BytesIO(response.content))

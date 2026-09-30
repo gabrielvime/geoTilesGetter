@@ -8,7 +8,7 @@ SOURCES = {
     'cbers': ['CBERS-4A FUSED', 'cbers_imagery'], 
     'sentinel2': ['Sentinel-2 L2A (AWS)', 'sentinel2_imagery'],
     'google': ['Google XYZ Tiles', 'Google_Imagery'],
-    'bing':'Bing'}
+    'bing': ['Bing STAC', 'bing_imagery']}
 """'source':['Source Name','source_path']"""
 
 RESOLUTION = 1024           # final square resolution
@@ -54,29 +54,4 @@ def sentinel2(bbox):
 def arcgis(x, y, z):
     return f"[https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/](https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/){z}/{y}/{x}"
 
-##### GOOGLE
-def google(x, y, z):
-    return f"https://mt0.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
-
-##### BING
-def bing(x, y, z):
-
-    quadkey = []
-    
-    for i in range(z, 0, -1):
-        digit = 0
-        mask = 1 << (i - 1)  
-        
-        if (x & mask) != 0:
-            digit += 1
-            
-        if (y & mask) != 0:
-            digit += 2
-            
-        quadkey.append(str(digit))
-        
-    q = ''.join(quadkey)
-
-    #return f'[http://ecn.t3.tiles.virtualearth.net/tiles/a](http://ecn.t3.tiles.virtualearth.net/tiles/a){q}.jpeg?g=1'
-    return f'[http://ecn.t3.tiles.virtualearth.net/tiles/a](http://ecn.t3.tiles.virtualearth.net/tiles/a){q}.jpeg?g=1'
 
