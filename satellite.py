@@ -10,10 +10,10 @@ import validate, polygon, config
 Get imagery from a shape with optional polygon border overlay
 '''
 
-def getData(shape_file, shapefile_name, source, getAll=True):
+def getData(gdf, shapefile_name, source, getAll=True):
 
     print(f'loading polygon...')
-    gdf = shape_file
+    #gdf = shape_file
     bbox = gdf.total_bounds
     print(f'shape: {shapefile_name}')
 

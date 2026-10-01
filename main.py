@@ -21,10 +21,14 @@ def main(source):
         xyz = ['google', 'bing']
 
         if source in satellites:
-            satellite.getData(gdf, shapefile_name, source=source, getAll=False)
+            satellite.getData(gdf=gdf, 
+            shapefile_name=shapefile_name, source=source, 
+            getAll=False)
        
         elif source in xyz:
-            xyzTiles.getData(geometryData=gdf, source=source, shapefile_name=shapefile_name)
+            xyzTiles.getData(gdf=gdf, 
+            source=source, 
+            shapefile_name=shapefile_name)
        
         elif source=='all':
             for s in satellites:

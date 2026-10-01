@@ -88,29 +88,59 @@ def window(shape, src, max_size=True, min_max=False, xyz=False):
 
     # calculates square size
 
-    if xyz:
-        exp_minx = cx - ((width * config.EXPAND_FACTOR) / 2)
-        exp_maxx = cx + ((width * config.EXPAND_FACTOR) / 2)
-        exp_miny = cy - ((height * config.EXPAND_FACTOR) / 2)
-        exp_maxy = cy + ((height * config.EXPAND_FACTOR) / 2)
-   
-    else:
-        pixel_size = src.res[0]
+    # if xyz:
 
-        if max_size:
-            # gets the max value betwen width and height and makes the square by them
-            square = max(width, height) * pixel_size * config.EXPAND_FACTOR
-        else:
-            # makes the square for the desired reosolution
-            square = config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
+    #     if config.SQUARE:
+    #         square = max(width, height) * config.EXPAND_FACTOR
+    #         exp_minx = cx - (square / 2)
+    #         exp_maxx = cx + (square / 2)
+    #         exp_miny = cy - (square / 2)
+    #         exp_maxy = cy + (square / 2)
+           
         
+    #     else:    
+    #         exp_minx = cx - ((width * config.EXPAND_FACTOR) / 2)
+    #         exp_maxx = cx + ((width * config.EXPAND_FACTOR) / 2)
+    #         exp_miny = cy - ((height * config.EXPAND_FACTOR) / 2)
+    #         exp_maxy = cy + ((height * config.EXPAND_FACTOR) / 2)
+   
+    # else:
+    #     pixel_size = src.res[0]
+
+    #     if max_size:
+    #         # gets the max value betwen width and height and makes the square by them
+    #         square = max(width, height) * pixel_size * config.EXPAND_FACTOR
+    #     else:
+    #         # makes the square for the desired reosolution
+    #         square = config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
+        
+    #     exp_minx = cx - (square / 2)
+    #     exp_maxx = cx + (square / 2)
+    #     exp_miny = cy - (square / 2)
+    #     exp_maxy = cy + (square / 2)
+
+    pixel_size = 1 if not hasattr(src, 'res') else src.res[0]
+
+    if config.SQUARE:
+
+        square = max(width, height) * pixel_size * config.EXPAND_FACTOR if config.MAX_SIZE else config.RESOLUTION * pixel_size * config.EXPAND_FACTOR
+
         exp_minx = cx - (square / 2)
         exp_maxx = cx + (square / 2)
         exp_miny = cy - (square / 2)
         exp_maxy = cy + (square / 2)
 
-    #print(f'width: {exp_maxx - exp_minx}')
-    #print(f'height: {exp_maxy - exp_miny}')        
+    else:
+
+        expand = max(width, height) if config.MAX_SIZE else config.RESOLUTION - min(width, height)
+        exp_minx = cx - (((width + expand) * config.EXPAND_FACTOR) / 2) * pixel_size
+        exp_maxx = cx + (((width + expand) * config.EXPAND_FACTOR) / 2) * pixel_size
+        exp_miny = cy - (((height + expand) * config.EXPAND_FACTOR) / 2) * pixel_size
+        exp_maxy = cy + (((height + expand) * config.EXPAND_FACTOR) / 2) * pixel_size
+   
+    
+    
+    
     if min_max:
         return exp_minx, exp_maxx, exp_miny, exp_maxy
 

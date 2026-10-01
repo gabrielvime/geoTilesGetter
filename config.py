@@ -11,15 +11,18 @@ SOURCES = {
     'bing': ['Bing STAC', 'bing_imagery']}
 """'source':['Source Name','source_path']"""
 
+### WINDOW CONFIGURATIONS ###
+SQUARE=False
 RESOLUTION = 1024           # final square resolution
 EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
-SHAPE_PATH = 'shapes'
-ZOOM = 18            #XYZ Tiles Zoom
+ZOOM = 16                   #XYZ Tiles Zoom
+MAX_SIZE=True
+
 DATETIME='2022-08-01/2026-08-30'
-MAX_SIZE=False
+SHAPE_PATH = 'shapes'
 
 ### POLYGON DRAW CONFIGURATIONS ##
-DRAW_POLYGON=False
+DRAW_POLYGON=True
 POLYGON_COLOR = 'red'
 POLYGON_WIDTH = 1
 
