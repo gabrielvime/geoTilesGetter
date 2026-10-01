@@ -43,8 +43,6 @@ def getData(geometryData, shapefile_name, source):
         if source == 'google':
             #url = config.google(t.x, t.y, t.z)
             url = f"https://mt0.google.com/vt/lyrs=s&x={t.x}&y={t.y}&z={t.z}"
-        elif source == 'arcgis':
-            url = config.arcgis(t.x, t.y, t.z)
         elif source == 'bing':
             qk = mercantile.quadkey(t)
             url = f"https://ecn.t1.tiles.virtualearth.net/tiles/a{qk}.jpeg?g=136"
