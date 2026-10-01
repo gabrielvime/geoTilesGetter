@@ -5,60 +5,64 @@ import mercantile
 import numpy as np
 import rasterio
 from rasterio.transform import from_bounds
+from rasterio.windows import from_bounds as window_from_bounds
+from rasterio.warp import transform_bounds
+from rasterio.enums import Resampling
+from rasterio.io import MemoryFile
 import requests
 from PIL import Image
 
 import polygon, config
 
-def getData(geometryData, shapefile_name, source):
+def getData(gdf, shapefile_name, source):
    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
-    
-    gdf = geometryData
 
     minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True, xyz=True)
+
+    bounds_3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
+    exp_minx, exp_miny, exp_maxx, exp_maxy = bounds_3857    
 
     print("fetching XYZ tiles for expanded bounds...")
     tiles = list(mercantile.tiles(minx, miny, maxx, maxy, config.ZOOM))
 
-    min_x = min(t.x for t in tiles)
-    max_x = max(t.x for t in tiles)
-    min_y = min(t.y for t in tiles)
-    max_y = max(t.y for t in tiles)
+    min_x = min(t.x for t in tiles) - 1
+    max_x = max(t.x for t in tiles) + 1
+    min_y = min(t.y for t in tiles) - 1
+    max_y = max(t.y for t in tiles) + 1
+
+    print(f'max_x {max_x} {max_y} {min_x} {min_y}')
 
     print("creating mosaic...")
     img_w = (max_x - min_x + 1) * 256
     img_h = (max_y - min_y + 1) * 256
+    
     mosaic = Image.new("RGB", (img_w, img_h))
 
+    total_tiles = (max_x - min_x + 1) * (max_y - min_y + 1)
     i = 1
-    ntiles = len(tiles)
-    print(f'getting scenes from:')
-    print(f'SOURCE: {config.SOURCES.get(source)[0]}')
-    for t in tiles:
-        print(f"tile {i} of {ntiles}")
-         
-        if source == 'google':
-            #url = config.google(t.x, t.y, t.z)
-            url = f"https://mt0.google.com/vt/lyrs=s&x={t.x}&y={t.y}&z={t.z}"
-        elif source == 'bing':
-            qk = mercantile.quadkey(t)
-            url = f"https://ecn.t1.tiles.virtualearth.net/tiles/a{qk}.jpeg?g=136"
+    for ty in range(min_y, max_y + 1):
+        for tx in range(min_x, max_x + 1):
+            print(f"Tile {i} of {total_tiles}")
             
-        response = requests.get(url, headers=headers)
+            if source == 'google':
+                url = f"https://mt0.google.com/vt/lyrs=s&x={tx}&y={ty}&z={config.ZOOM}"
+            elif source == 'bing':
+                qk = mercantile.quadkey(tx, ty, config.ZOOM)
+                url = f"https://ecn.t1.tiles.virtualearth.net/tiles/a{qk}.jpeg?g=136"
+                
+            response = requests.get(url, headers=headers)
 
-        if response.status_code == 200:
-            tile_img = Image.open(BytesIO(response.content))
-            px = (t.x - min_x) * 256
-            py = (t.y - min_y) * 256
-            mosaic.paste(tile_img, (px, py))
-        else:
-            print(f"STATUS: {response.status_code}")
-            return
-
-        i += 1
+            if response.status_code == 200:
+                tile_img = Image.open(BytesIO(response.content))
+                px = (tx - min_x) * 256
+                py = (ty - min_y) * 256
+                mosaic.paste(tile_img, (px, py))
+            else:
+                print(f"STATUS {response.status_code} in {tx},{ty}")
+            i += 1
 
     print("calculating spatial bounds...")
     top_left_bounds = mercantile.xy_bounds(min_x, min_y, config.ZOOM)
@@ -73,13 +77,19 @@ def getData(geometryData, shapefile_name, source):
 
     arr = np.array(mosaic)
 
-    # polygon draw
-    if config.DRAW_POLYGON:
-        print(gdf.crs)
-        print(f'drawing polygon...')
-        arr = polygon.draw(image=arr, shape=geometryData, transform=transform, xyz=True, crs="EPSG:3857")
+    print("Resampling to target resolution...")
+    if config.SQUARE:
+        out_w = config.RESOLUTION
+        out_h = config.RESOLUTION
+    else:
+        geo_w = exp_maxx - exp_minx
+        geo_h = exp_maxy - exp_miny
+        scale = config.RESOLUTION / max(geo_w, geo_h)
+        out_w = int(geo_w * scale)
+        out_h = int(geo_h * scale)
 
-    tif_meta = {
+
+    meta = {
         "driver": "GTiff",
         "height": img_h,
         "width": img_w,
@@ -89,10 +99,40 @@ def getData(geometryData, shapefile_name, source):
         "transform": transform,
     }
 
+    with MemoryFile() as memfile:
+        with memfile.open(**meta) as dataset:
+            dataset.write(arr[:, :, 0], 1)
+            dataset.write(arr[:, :, 1], 2)
+            dataset.write(arr[:, :, 2], 3)
+            
+            window = window_from_bounds(exp_minx, exp_miny, exp_maxx, exp_maxy, dataset.transform)
+            
+            cropped_image = dataset.read(
+                window=window, 
+                out_shape=(3, out_h, out_w),
+                resampling=Resampling.bilinear,
+                boundless=True, fill_value=0
+            )
+            
+            transform_final = rasterio.transform.from_bounds(
+                exp_minx, exp_miny, exp_maxx, exp_maxy, 
+                out_w, out_h
+            )
+
+    # polygon draw
+    if config.DRAW_POLYGON:
+        print(f'drawing polygon...')
+        arr = polygon.draw(
+            image=arr, 
+            shape=gdf, 
+            transform=transform, 
+            xyz=True, 
+            crs="EPSG:3857")
+
     output_filepath = config.SOURCES.get(source)[1] + '/' f"{shapefile_name}_z{config.ZOOM}.tif"
 
     print(f"exporting to {output_filepath}...")
-    with rasterio.open(output_filepath, "w", **tif_meta) as dst:
+    with rasterio.open(output_filepath, "w", **meta) as dst:
         dst.write(arr[:, :, 0], 1)
         dst.write(arr[:, :, 1], 2)
         dst.write(arr[:, :, 2], 3)
