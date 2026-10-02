@@ -20,13 +20,13 @@ def getData(gdf, shapefile_name, source):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-    minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True)
+    minx, miny, maxx, maxy = polygon.window(gdf, None, min_max=True, crs='EPSG:3857')
 
     bounds_3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
     exp_minx, exp_miny, exp_maxx, exp_maxy = bounds_3857    
 
     print("fetching XYZ tiles for expanded bounds...")
-    tiles = list(mercantile.tiles(exp_minx, exp_miny, exp_maxx, exp_maxy, config.ZOOM))#(minx, miny, maxx, maxy, config.ZOOM))
+    tiles = list(mercantile.tiles(minx, miny, maxx, maxy, config.ZOOM))
 
     min_x = min(t.x for t in tiles) - 1
     max_x = max(t.x for t in tiles) + 1
@@ -60,7 +60,7 @@ def getData(gdf, shapefile_name, source):
 
             
             if source == 'google':
-                url = f"https://mt0.google.com/vt/lyrs=s&x={tx}&y={ty}&z={config.ZOOM}"
+                url = f""
             elif source == 'bing':
                 qk = mercantile.quadkey(tx, ty, config.ZOOM)
                 url = f""

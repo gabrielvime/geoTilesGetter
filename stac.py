@@ -68,7 +68,7 @@ def getData(gdf, shapefile_name, source, getAll=True):
 
                 print(f'calculating scene bounds...')
                 # get polygon window
-                window = polygon.window(gdf, src, max_size=config.MAX_SIZE)
+                window = polygon.window(gdf, src, max_size=config.MAX_SIZE, crs='EPSG:4326')
 
                 # get image
                 print(f'getting image...')

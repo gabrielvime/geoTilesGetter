@@ -3,6 +3,7 @@ import os
 import rasterio
 from rasterio.features import rasterize
 import numpy as np
+from rasterio.warp import transform_bounds
 
 import config
 
@@ -71,11 +72,14 @@ def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
         
     return image
 
-def window(shape, src, max_size=True, min_max=False, xyz=False):
+def window(shape, src, max_size=True, min_max=False, crs="EPSG:4326"):
     '''
     Return bounding window fo given gdf shape
     if min_max, return minX, maX, minY, maxY
     '''
+    
+    if crs=='EPSG:3857':
+        shape = shape.to_crs(crs)
 
     # calculates width and height
     minx, miny, maxx, maxy = shape.total_bounds
@@ -105,11 +109,13 @@ def window(shape, src, max_size=True, min_max=False, xyz=False):
         exp_miny = cy - (((height + expand) * config.EXPAND_FACTOR) / 2)
         exp_maxy = cy + (((height + expand) * config.EXPAND_FACTOR) / 2)
    
-    
+    if shape.crs == 'EPSG:3857':
+        bounds = transform_bounds(shape.crs, 'EPSG:4326', exp_minx, exp_miny, exp_maxx, exp_maxy)
+        exp_minx, exp_miny, exp_maxx, exp_maxy = bounds
     
     
     if min_max:
-        return exp_minx, exp_maxx, exp_miny, exp_maxy
+        return exp_minx, exp_miny, exp_maxx, exp_maxy
 
     window = rasterio.windows.from_bounds(
         exp_minx, exp_miny, exp_maxx, exp_maxy, src.transform

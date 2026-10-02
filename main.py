@@ -1,4 +1,4 @@
-import satellite, polygon, config, xyzTiles
+import stac, polygon, config, webTiles
 import geopandas as gpd
 import os
 from pathlib import Path
@@ -21,12 +21,12 @@ def main(source):
         xyz = ['google', 'bing']
 
         if source in satellites:
-            satellite.getData(gdf=gdf, 
+            stac.getData(gdf=gdf, 
             shapefile_name=shapefile_name, source=source, 
             getAll=False)
        
         elif source in xyz:
-            xyzTiles.getData(gdf=gdf, 
+            webTiles.getData(gdf=gdf, 
             source=source, 
             shapefile_name=shapefile_name)
        
@@ -34,11 +34,11 @@ def main(source):
             for s in satellites:
                 output_dir = Path(config.SOURCES.get(s)[1])
                 output_dir.mkdir(parents=True, exist_ok=True)
-                satellite.getData(gdf, shapefile_name, source=s, getAll=False)
+                stac.getData(gdf, shapefile_name, source=s, getAll=False)
             for s in xyz:
                 output_dir = Path(config.SOURCES.get(s)[1])
                 output_dir.mkdir(parents=True, exist_ok=True)
-                xyzTiles.getData(geometryData=gdf, source=s, shapefile_name=shapefile_name)
+                webTiles.getData(geometryData=gdf, source=s, shapefile_name=shapefile_name)
        
         else:
             print(f'invalide source')
