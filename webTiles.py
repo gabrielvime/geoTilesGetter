@@ -20,20 +20,18 @@ def getData(gdf, shapefile_name, source):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-    minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True, xyz=True)
+    minx, maxx, miny, maxy = polygon.window(gdf, None, min_max=True)
 
     bounds_3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
     exp_minx, exp_miny, exp_maxx, exp_maxy = bounds_3857    
 
     print("fetching XYZ tiles for expanded bounds...")
-    tiles = list(mercantile.tiles(minx, miny, maxx, maxy, config.ZOOM))
+    tiles = list(mercantile.tiles(exp_minx, exp_miny, exp_maxx, exp_maxy, config.ZOOM))#(minx, miny, maxx, maxy, config.ZOOM))
 
     min_x = min(t.x for t in tiles) - 1
     max_x = max(t.x for t in tiles) + 1
     min_y = min(t.y for t in tiles) - 1
     max_y = max(t.y for t in tiles) + 1
-
-    print(f'max_x {max_x} {max_y} {min_x} {min_y}')
 
     print("creating mosaic...")
     img_w = (max_x - min_x + 1) * 256
@@ -62,7 +60,7 @@ def getData(gdf, shapefile_name, source):
 
             
             if source == 'google':
-                url = f""
+                url = f"https://mt0.google.com/vt/lyrs=s&x={tx}&y={ty}&z={config.ZOOM}"
             elif source == 'bing':
                 qk = mercantile.quadkey(tx, ty, config.ZOOM)
                 url = f""
