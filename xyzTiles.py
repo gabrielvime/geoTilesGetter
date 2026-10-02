@@ -46,12 +46,26 @@ def getData(gdf, shapefile_name, source):
     for ty in range(min_y, max_y + 1):
         for tx in range(min_x, max_x + 1):
             print(f"Tile {i} of {total_tiles}")
+
+
+            # ==============================================================================
+            # LEGAL DISCLAIMER: COMMERCIAL TILE SERVERS (GOOGLE / BING)
+            # ==============================================================================
+            # This project does not provide or distribute URLs for proprietary map services. 
+            # Automated access (scraping) and bulk downloading of commercial tiles may 
+            # violate the providers' Terms of Service (ToS) and copyright laws. 
+            # 
+            # By manually configuring the URLs below, you (the end-user) assume FULL 
+            # legal and technical responsibility for your actions, including IP bans or 
+            # legal liabilities. The author of this script assumes zero responsibility.
+            # ==============================================================================
+
             
             if source == 'google':
-                url = f"https://mt0.google.com/vt/lyrs=s&x={tx}&y={ty}&z={config.ZOOM}"
+                url = f""
             elif source == 'bing':
                 qk = mercantile.quadkey(tx, ty, config.ZOOM)
-                url = f"https://ecn.t1.tiles.virtualearth.net/tiles/a{qk}.jpeg?g=136"
+                url = f""
                 
             response = requests.get(url, headers=headers)
 
