@@ -102,14 +102,17 @@ This data source provides continuous, high-resolution global mosaic imagery deli
 
 This repository (`geoTilesGetter`) and its source code are distributed under the **MIT License**. Please note that this license applies **strictly to the software code** authored in this repository and **does not extend** to any data, images, or map tiles retrieved using the tool.
 
-**1. Educational Purpose & No Included Endpoints**
-This project is a Proof of Concept (PoC) developed strictly for educational and academic purposes in software engineering and geospatial mathematics. To ensure strict compliance with intellectual property rights, **this repository does not host, distribute, or contain any copyrighted imagery, nor does it include hardcoded URLs, access keys, or API endpoints for commercial providers** (such as Google Maps or Bing Maps). 
+1. **Educational Purpose & No Included Endpoints**
 
-**2. User Responsibility and Provider Restrictions**
-By configuring and using this tool, the end-user assumes all legal responsibilities for complying with the Terms of Service (ToS) of their manually configured data providers. Users must be aware that commercial providers generally strictly prohibit:
+    This project is a Proof of Concept (PoC) developed strictly for educational and academic purposes in software engineering and geospatial mathematics. To ensure strict compliance with intellectual property rights, **this repository does not host, distribute, or contain any copyrighted imagery, nor does it include hardcoded URLs, access keys, or API endpoints for commercial providers** (such as Google Maps or Bing Maps). 
+
+2. **User Responsibility and Provider Restrictions**
+
+    By configuring and using this tool, the end-user assumes all legal responsibilities for complying with the Terms of Service (ToS) of their manually configured data providers. Users must be aware that commercial providers generally strictly prohibit:
 * Unauthorized automated access (web scraping) outside of official APIs.
 * Bulk downloading for offline storage or proprietary databases.
 * The creation of derivative works, which explicitly includes using proprietary map tiles for the training of Machine Learning or Artificial Intelligence models.
 
-**3. Exemption of Liability**
-The author of this repository is not affiliated with Google LLC, Microsoft Corporation, or any other commercial spatial data provider. The author **shall not be held liable** for any IP bans, account suspensions, DMCA takedowns, or legal actions arising from the unauthorized access, mass downloading, or misuse of copyrighted data by users of this software. The legal compliance of data acquisition and processing rests entirely with the end-user.
+3. **Exemption of Liability**
+
+    The author of this repository is not affiliated with Google LLC, Microsoft Corporation, or any other commercial spatial data provider. The author **shall not be held liable** for any IP bans, account suspensions, DMCA takedowns, or legal actions arising from the unauthorized access, mass downloading, or misuse of copyrighted data by users of this software. The legal compliance of data acquisition and processing rests entirely with the end-user.
