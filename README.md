@@ -50,6 +50,8 @@ This data source provides global high-resolution satellite and aerial imagery se
 
 **Provider:** Microsoft Corporation.
 
+**License:** [Microsoft Bing Maps Platform APIs Terms Of Use](https://www.bingmapsportal.com/terms/)
+
 ### CBERS-4A
 
 [CBERS-4A/WPM - Multispectral and Panchromatic Bands Fusioned](https://data.inpe.br/stac/browser/collections/CB4A-WPM-PCA-FUSED-1)
@@ -70,6 +72,8 @@ This data source provides continuous, high-resolution global mosaic imagery deli
 **Usage Restrictions:** Google strictly prohibits unauthorized automated access (web scraping), bulk downloading for offline storage, and the creation of derivative works, which explicitly includes the training of Machine Learning or Artificial Intelligence models. Legal usage requires an active license via the Google Maps Platform API.
 
 **Provider:** Google LLC.
+
+**License:** [Google Maps Platform Terms of Service](https://cloud.google.com/maps-platform/terms)
 
 
 ### Sentinel-2
