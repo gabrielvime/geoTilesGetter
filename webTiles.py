@@ -11,10 +11,13 @@ from rasterio.enums import Resampling
 from rasterio.io import MemoryFile
 import requests
 from PIL import Image
+import time
 
 import polygon, config
 
 def getData(gdf, shapefile_name, source):
+
+    requests_cont = 0
    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -65,7 +68,19 @@ def getData(gdf, shapefile_name, source):
                 qk = mercantile.quadkey(tx, ty, config.ZOOM)
                 url = f""
                 
+            if requests_cont >= 3000:
+
+                print(f'request limit exceded!!')
+
+                for s in range(60, -1, -1):
+                    print(f"waiting: {s} seconds to continue...    ", end='\r', flush=True)
+                    time.sleep(1)
+                
+                requests_cont = 0
+                
             response = requests.get(url, headers=headers)
+
+            requests_cont += 1
 
             if response.status_code == 200:
                 tile_img = Image.open(BytesIO(response.content))
