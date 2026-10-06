@@ -17,8 +17,7 @@ def gdf(shape_file):
     Get GeoPandas GeoDataFrame in WGS84
     '''
 
-    shapefile_path = shape_file
-    gdf = gpd.read_file(shapefile_path)
+    gdf = gpd.read_file(shape_file)
 
     if gdf.crs != "EPSG:4326":
         gdf = gdf.to_crs("EPSG:4326")
