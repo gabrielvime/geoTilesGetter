@@ -4,7 +4,17 @@ import os
 from pathlib import Path
 import argparse
 
-def main(source):
+def main(source, test=False):
+
+    if test:
+        print(f'\n TEST MODE \n')
+        shape = os.listdir(config.SHAPE_PATH)
+
+        gdf = shape_tools.gdf(shape_file=shape)
+
+        print(f'id: {gdf['id']}')
+        print(f'processo: {gdf['processo']}')
+        exit
 
     if source!='all':
         output_dir = Path(config.SOURCES.get(source)[1])
@@ -49,9 +59,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='get sattellite imagery from desired source')
 
     parser.add_argument('--source', type=str, required=True, help='cbers, google, sentinel2...')
+    parser.add_argument('--test', type=bool, required=False, help='test mode')
 
     args = parser.parse_args()
 
-    main(source=args.source)
+    main(source=args.source, test=args.test)
 
     
