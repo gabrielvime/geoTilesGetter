@@ -63,12 +63,12 @@ def getData(gdf, shapefile_name, source):
 
             
             if source == 'google':
-                url = f""
+                url = f''
             elif source == 'bing':
                 qk = mercantile.quadkey(tx, ty, config.ZOOM)
                 url = f""
                 
-            if requests_cont >= 3000:
+            if requests_cont >= 1000:
 
                 print(f'request limit exceded!!')
 
@@ -141,10 +141,16 @@ def getData(gdf, shapefile_name, source):
                 boundless=True, fill_value=0
             )
             
-            transform_final = rasterio.transform.from_bounds(
+            final_transform = rasterio.transform.from_bounds(
                 exp_minx, exp_miny, exp_maxx, exp_maxy, 
                 out_w, out_h
             )
+    
+    meta.update({
+        'height':out_h,
+        'width':out_w,
+        'transform': final_transform
+        })
 
     # polygon draw
     if config.DRAW_POLYGON:
