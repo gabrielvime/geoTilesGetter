@@ -32,7 +32,7 @@ def getData(gdf, shapefile_name, source, getAll=True):
     print(f'getting scenes from:')
     print(f'SOURCE: {config.SOURCES.get(source)[0]}')
     print(f'COLLECTION: {items[0].collection_id}')
-    print(f'DATE FRAME:{items[0].datetime} to {items[len(items) - 1].datetime}')
+    print(f'DATE FRAME:{items[len(items) - 1].datetime} to {items[0].datetime}')
     print(f'SHAPE: {shapefile_name}')
     print()
 
@@ -129,7 +129,7 @@ def getData(gdf, shapefile_name, source, getAll=True):
             continue
 
     
-    print(f'finished')
+    print(f'\n done!\n')
 
     if not success:
         print("error: no scene found")
