@@ -1,4 +1,4 @@
-import stac, polygon, config, webTiles
+import stac, shape_tools, config, web_tiles
 import geopandas as gpd
 import os
 from pathlib import Path
@@ -15,7 +15,7 @@ def main(source):
     for shape in shapes_list:
 
         shapefile_name = Path(shape).stem
-        gdf = polygon.gdf4326(config.SHAPE_PATH + '/' + shape)        
+        gdf = shape_tools.gdf4326(config.SHAPE_PATH + '/' + shape)        
 
         satellites = ['cbers', 'sentinel2']
         xyz = ['google', 'bing']
@@ -26,7 +26,7 @@ def main(source):
             getAll=False)
        
         elif source in xyz:
-            webTiles.getData(gdf=gdf, 
+            web_tiles.getData(gdf=gdf, 
             source=source, 
             shapefile_name=shapefile_name)
        

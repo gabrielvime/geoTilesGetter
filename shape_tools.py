@@ -8,11 +8,11 @@ from rasterio.warp import transform_bounds
 import config
 
 '''
-Polygon functions
+ShapeFile functions
 '''
 
 
-def gdf4326(shape_file):
+def gdf(shape_file):
     '''
     Get GeoPandas GeoDataFrame in WGS84
     '''

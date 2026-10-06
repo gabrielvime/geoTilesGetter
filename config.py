@@ -13,16 +13,16 @@ SOURCES = {
 
 ### WINDOW CONFIGURATIONS ###
 SQUARE=True
-RESOLUTION = 1024           # final square resolution
+RESOLUTION = 512            # final square resolution
 EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
-ZOOM = 16                   #XYZ Tiles Zoom
-MAX_SIZE=False
+ZOOM = 18                   #XYZ Tiles Zoom
+MAX_SIZE=True
 
 DATETIME='2023-02-03/2026-08-30'
 SHAPE_PATH = 'shapes'
 
 ### POLYGON DRAW CONFIGURATIONS ##
-DRAW_POLYGON=True
+DRAW_POLYGON=False
 POLYGON_COLOR = 'red'
 POLYGON_WIDTH = 1
 
@@ -35,7 +35,7 @@ def cbers(bbox):
     search = catalog.search(
         collections=["CB4A-WPM-PCA-FUSED-1"],   # collection
         bbox=bbox,                              # bounding box
-        datetime=DATETIME)       #time frame
+        datetime=DATETIME)                      #time frame
 
     return list(search.items())
 

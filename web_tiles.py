@@ -13,7 +13,7 @@ import requests
 from PIL import Image
 import time
 
-import polygon, config
+import shape_tools, config
 
 def getData(gdf, shapefile_name, source):
 
@@ -23,7 +23,7 @@ def getData(gdf, shapefile_name, source):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-    minx, miny, maxx, maxy = polygon.window(gdf, None, min_max=True, crs='EPSG:3857')
+    minx, miny, maxx, maxy = shape_tools.window(gdf, None, min_max=True, crs='EPSG:3857')
 
     bounds_3857 = transform_bounds("EPSG:4326", "EPSG:3857", minx, miny, maxx, maxy)
     exp_minx, exp_miny, exp_maxx, exp_maxy = bounds_3857    
@@ -155,7 +155,7 @@ def getData(gdf, shapefile_name, source):
     # polygon draw
     if config.DRAW_POLYGON:
         print(f'drawing polygon...')
-        arr = polygon.draw(
+        arr = shape_tools.draw(
             image=arr, 
             shape=gdf, 
             transform=transform, 

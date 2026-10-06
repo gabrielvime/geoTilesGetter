@@ -4,7 +4,7 @@ from rasterio.features import rasterize
 import numpy as np
 from shapely.geometry import box, shape
 
-import validate, polygon, config
+import validate, shape_tools, config
 
 '''
 Get imagery from a shape with optional polygon border overlay
@@ -68,7 +68,7 @@ def getData(gdf, shapefile_name, source, getAll=True):
 
                 print(f'calculating scene bounds...')
                 # get polygon window
-                window = polygon.window(gdf, src, max_size=config.MAX_SIZE, crs='EPSG:4326')
+                window = shape_tools.window(gdf, src, max_size=config.MAX_SIZE, crs='EPSG:4326')
 
                 # get image
                 print(f'getting image...')
@@ -98,7 +98,7 @@ def getData(gdf, shapefile_name, source, getAll=True):
                 # draw polygon
                 if config.DRAW_POLYGON:
                     print(f'drawing polygon...')
-                    image = polygon.draw(image, gdf, transform,crs=gdf.crs)
+                    image = shape_tools.draw(image, gdf, transform,crs=gdf.crs)
                     
 
                 ###
