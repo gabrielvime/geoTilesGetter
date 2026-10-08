@@ -10,7 +10,7 @@ import validate, shape_tools, config
 Get imagery from a shape with optional polygon border overlay
 '''
 
-def getData(gdf, shapefile_name, source, getAll=True):
+def getData(gdf, shapefile_name, source, aux_shape=None, getAll=True):
 
     print(f'loading polygon...')
     
@@ -82,10 +82,10 @@ def getData(gdf, shapefile_name, source, getAll=True):
                 # image validations
                      
                 print(f'checking cloud cover...')
-                if not validate.cloudFilter(image, cloud_threshold=0.05, contrast_threshold=10.0, blur_threshold=10.0):
-                    print(f'cloud covered...')
-                    print(f'skipping...')
-                    continue
+                #if not validate.cloudFilter(image, cloud_threshold=0.05, contrast_threshold=10.0, blur_threshold=10.0):
+                    #print(f'cloud covered...')
+                    #print(f'skipping...')
+                    #continue
                 
                 print(f'verifing data integrity...')
                 if not validate.dataIntegrity(image, threshold=0.05):
@@ -98,10 +98,23 @@ def getData(gdf, shapefile_name, source, getAll=True):
                 # draw polygon
                 if config.DRAW_POLYGON:
                     print(f'drawing polygon...')
-                    image = shape_tools.draw(image, gdf, transform,crs=gdf.crs)
                     
-
-                ###
+                    if aux_shape is None:
+                        image = shape_tools.draw(
+                            image, 
+                            shape=gdf, 
+                            transform=transform,
+                            crs=gdf.crs
+                            )
+                        
+                    else:
+                        image = shape_tools.draw(
+                            image, 
+                            shape=aux_shape, 
+                            transform=transform,
+                            crs=gdf.crs
+                            )    
+                    
                 # file saving
                 print(f'saving file...')
                 out_meta = src.meta.copy()

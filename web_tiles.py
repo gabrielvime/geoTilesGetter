@@ -156,18 +156,19 @@ def getData(gdf, shapefile_name, source):
     if config.DRAW_POLYGON:
         print(f'drawing polygon...')
         arr = shape_tools.draw(
-            image=arr, 
+            image=cropped_image, 
             shape=gdf, 
             transform=transform, 
-            xyz=True, 
+ 
             crs="EPSG:3857")
 
     output_filepath = config.SOURCES.get(source)[1] + '/' f"{shapefile_name}_z{config.ZOOM}.tif"
 
     print(f"exporting to {output_filepath}...")
     with rasterio.open(output_filepath, "w", **meta) as dst:
-        dst.write(arr[:, :, 0], 1)
-        dst.write(arr[:, :, 1], 2)
-        dst.write(arr[:, :, 2], 3)
+        # dst.write(arr[:, :, 0], 1)
+        # dst.write(arr[:, :, 1], 2)
+        # dst.write(arr[:, :, 2], 3)
+        dst.write(cropped_image)
 
     print("done")

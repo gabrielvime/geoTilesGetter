@@ -4,6 +4,7 @@ import rasterio
 from rasterio.features import rasterize
 import numpy as np
 from rasterio.warp import transform_bounds
+import shapely
 
 import config
 
@@ -25,51 +26,59 @@ def gdf(shape_file):
     return gdf
 
 
-def draw(image, shape, transform, xyz=False, crs="EPSG:4326"):
+def draw(image, shape, transform, crs="EPSG:4326"):
     """
-    Draw polygon shape
+    Draw polygon shape with automatic array format detection.
     """
-    # Cria linhas/bordas a partir dos polígonos
 
+
+    # 1. Garante que as geometrias estejam no CRS correto da imagem
     shape = shape.to_crs(crs)
     boundaries = shape.geometry.boundary
     
-    # Se a linha for mais larga que 1px, aplica buffer
+    # 2. Aplica buffer se a linha for mais larga que 1px
     if config.POLYGON_WIDTH > 1:
         pixel_size = abs(transform.a)
         boundaries = boundaries.buffer(config.POLYGON_WIDTH * pixel_size)
 
-    # Define a cor RGB (valores de 0 a 255)
+    # 3. Define a cor RGB (valores de 0 a 255)
     colors = {
         'red': (255, 0, 0),
         'yellow': (255, 255, 0),
-        'blue': (255, 255, 255)
+        'blue': (0, 0, 255)  # Corrigido de (255, 255, 255) para o azul real
     }
     rgb_color = colors.get(config.POLYGON_COLOR.lower(), (255, 0, 0))
     
-    # Cria máscara booleana rasterizando as geometrias
-    if xyz:
-        mask_shape = (image.shape[0], image.shape[1])
-    else:    
-        mask_shape = (image.shape[1], image.shape[2])
+    is_channels_first = image.shape[0] < 10
 
+    if is_channels_first:
+        mask_shape = (image.shape[1], image.shape[2])
+    else:    
+        mask_shape = (image.shape[0], image.shape[1])
+
+    # 5. Cria máscara booleana rasterizando as geometrias
     polygon_mask = rasterize(
         shapes=boundaries,
         out_shape=mask_shape,
         transform=transform,
         fill=0,
         default_value=1,
-        dtype=np.uint8
+        dtype=np.uint8,
+        all_touched=True
     ) > 0
 
-    # Aplica a cor em cada banda do array RGB recortado
+    # 6. Aplica a cor em cada banda do array RGB de acordo com o formato
     for band_idx in range(3):
-        if xyz:
-            image[:, :, band_idx][polygon_mask] = rgb_color[band_idx]
+        if is_channels_first:
+            # Lógica STAC / Rasterio
+            image[band_idx, polygon_mask] = rgb_color[band_idx]
         else:
-            image[band_idx][polygon_mask] = rgb_color[band_idx]
+            # Lógica Web Tiles / Numpy
+            #image[:, :, band_idx][polygon_mask] = rgb_color[band_idx]
+            image[polygon_mask, band_idx] = rgb_color[band_idx]
         
     return image
+
 
 def window(shape, src, max_size=True, min_max=False, crs="EPSG:4326"):
     '''
@@ -121,3 +130,45 @@ def window(shape, src, max_size=True, min_max=False, crs="EPSG:4326"):
     )
 
     return window
+
+
+def divide(shape, size=config.RESOLUTION, crs="EPSG:3857"):
+
+    shapes_list = []
+
+    # calculates width and height
+    shape = shape.to_crs("EPSG:3857")
+    minx, miny, maxx, maxy = shape.total_bounds
+    width = maxx - minx
+    height = maxy - miny
+
+    # centers
+    cx = (minx + maxx) / 2
+    cy = (miny + maxy) / 2
+
+    start_x = minx - 256
+    end_x= maxx + 256
+    start_y = miny - 256
+    end_y = maxy + 256
+
+    while start_x <= end_x:
+        while start_y <= end_y:
+            
+            tmp_max_x = start_x + size
+            tmp_max_y = start_y + size
+
+            temp_shape = shapely.box(start_x, start_y, tmp_max_x, tmp_max_y)
+            temp_geo = gpd.GeoDataFrame(geometry=[temp_shape], crs="EPSG:3857")
+
+            if temp_geo.intersects(shape)[0]:
+                shapes_list.append(temp_geo)
+            
+            temp_shape=None
+            temp_geo=None
+
+            start_x += size
+            start_y += size
+
+
+    return shapes_list
+    

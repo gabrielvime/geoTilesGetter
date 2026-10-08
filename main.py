@@ -13,19 +13,49 @@ def main(source, test=False):
 
         gdf = shape_tools.gdf(shape_file=config.SHAPE_PATH + '/' + shape)
 
+        big=0
+        small=0
+        id_test=114450
         
         for idx, row in gdf.iterrows():
-            print(f'{idx} - id: {row['id']} - processo: {row['processo']}')
+            
+            # if row['id']!=id_test:
+            #     continue
 
+            print(f'{idx} - id: {row['id']} - processo: {row['processo']}')
             polygon=row['geometry'].envelope
 
+            print()
+
             data_frame = gpd.GeoDataFrame(geometry=[polygon], crs=gdf.crs)
-            stac.getData(
-                gdf=data_frame,
-                shapefile_name='test,',
-                source='cbers',
-                getAll=False)
+
+
+            if row['area_ha'] >= 100.0:
+
+                shapes_divided = shape_tools.divide(shape=data_frame,size=1024,crs="EPSG:4326")
+                print(f'dividido em: {len(shapes_divided)}')
+
+                i=0
+                for shape in shapes_divided:
+
+                    print(f'working in {row['processo']}_part{i}')
+                    shape=shape.to_crs(data_frame.crs)
+                    print(shape.crs)
+
+
+                    i += 1
+
+                    print('done')
+                    stac.getData(
+                        gdf=shape,
+                        shapefile_name=f'{row['processo'].replace('/','-')}_part{i}',
+                        source='cbers',
+                        aux_shape=data_frame,
+                        getAll=False)
             break
+
+        #print(f'big: {big}')
+        #print(f'small: {small}')
             
         ##############################################################################
         exit()

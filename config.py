@@ -16,13 +16,13 @@ SQUARE=True
 RESOLUTION = 512            # final square resolution
 EXPAND_FACTOR = 1.0         # expansion factor (1.0 means original size), not recommended to mess with this
 ZOOM = 18                   #XYZ Tiles Zoom
-MAX_SIZE=True
+MAX_SIZE=False
 
 DATETIME='2023-02-03/2026-08-30'
 SHAPE_PATH = 'shapes'
 
 ### POLYGON DRAW CONFIGURATIONS ##
-DRAW_POLYGON=False
+DRAW_POLYGON=True
 POLYGON_COLOR = 'red'
 POLYGON_WIDTH = 1
 
